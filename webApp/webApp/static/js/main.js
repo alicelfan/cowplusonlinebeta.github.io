@@ -1888,27 +1888,29 @@ async function filterGrid(){
 	console.log(filterItems)
 }
 
-async function retrieveCSVThirdStep() {
-	csv_file = [];
-	await hideDownloadMessage();
-	await filterGrid();
-	try {
-        const response = await fetch('downloadDf'); // issues a GET request by default
-        const data = await response.json(); // data becomes the response from create_df(), which is { 'message': 'data processing successful', 'status': 200, 'new_df': new_df }
-        // access the new_df data from the response
-		const download_csv = data.csv; // this js constant is set to the new_df output from the response, which is a JSON array
-        // populate myData with new_df
-		csv_file = download_csv
-    } catch (error) {
-		console.error('error processing data:', error);
-    } finally {
-		showDownloadMessage();
-	}
-    return csv_file;
-}
+// async function retrieveCSVThirdStep() {
+// 	csv_file = [];
+// 	await hideDownloadMessage();
+// 	await filterGrid();
+// 	try {
+//         const response = await fetch('downloadDf'); // issues a GET request by default
+//         const data = await response.json(); // data becomes the response from create_df(), which is { 'message': 'data processing successful', 'status': 200, 'new_df': new_df }
+//         // access the new_df data from the response
+// 		const download_csv = data.csv; // this js constant is set to the new_df output from the response, which is a JSON array
+//         // populate myData with new_df
+// 		csv_file = download_csv
+//     } catch (error) {
+// 		console.error('error processing data:', error);
+//     } finally {
+// 		showDownloadMessage();
+// 	}
+//     return csv_file;
+// }
 
 async function exportTableToCSV(filename) {
-	var csv = await retrieveCSVThirdStep();
+	// var csv = await retrieveCSVThirdStep();
+	await filterGrid()
+	location.replace('/downloadDf')
 }
 
 

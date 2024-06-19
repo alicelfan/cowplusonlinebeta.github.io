@@ -783,11 +783,15 @@ def test_download():
 def popup(message):
     return render_template('popup.html', message=message)
 
+def change_to_csv ():
+    today = datetime.now()
+    path = "cowplus_online_"+str(today.year) + str(today.month) + str(today.day) + "_" + str(today.hour) + "_" + str(today.minute) + "_" + str(today.second) + ".csv"
+    return send_file(path, as_attachment=True)
+
 @app.route('/downloadDf/', methods=['POST', "GET"])
 def downloadCSV():
     global dataframe2, chng_df, yearMin, yearMax, stateOneFilter, stateTwoFilter
     chng_df = dataframe2.copy(deep = True)
-    today = datetime.now()
     if yearMin == "":
         yearMin = 1000
     if yearMax == "":
@@ -799,13 +803,12 @@ def downloadCSV():
     if (len(stateTwoFilter) != 0) & ("stateabb2" in chng_df.columns):
         chng_df = chng_df[chng_df['stateabb2'].isin(stateTwoFilter)]
     chng_df = chng_df.loc[(chng_df['year'] >= int(yearMin)) & (chng_df['year'] <= int(yearMax))] 
-    csv_content = chng_df.to_csv(index=False)
-    response = make_response(csv_content)
-    #/bm
-    filename = f"cowplus_online_{today.strftime('%Y%m%d_%H%M%S')}.csv"
-    response.headers['Content-Disposition'] = "attachment; filename=" + filename
-    response.headers['Content-Type'] = 'text/csv'
+    chng_df.change_to_csv()
     print("csv converted")
+    response = {
+        "message": "data processing successful",
+        "status": 200,
+    }
     return response
 
 # generic for all req. to save code
