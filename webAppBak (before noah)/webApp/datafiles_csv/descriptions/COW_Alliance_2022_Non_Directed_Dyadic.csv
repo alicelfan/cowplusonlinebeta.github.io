@@ -1,0 +1,2 @@
+ccode1,stateabb1,ccode2,stateabb2,year,defense,neutrality,nonaggression,entente
+"","","","","",1 if one or both states in the dyad  a defense pact with the othadher state in the dyad,1 if one or both states in the dyad had a neutrality pact with the other state in the dyad,1 if one or both states in the dyad had a non-aggression pact with the other state in the dyad,1 if one or both states in the dyad had an understanding that consultations with the other state in the dyad would take place if a crisis occurred

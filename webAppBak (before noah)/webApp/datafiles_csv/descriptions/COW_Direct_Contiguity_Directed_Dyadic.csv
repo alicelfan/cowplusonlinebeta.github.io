@@ -1,0 +1,8 @@
+dyad,ccode1,stateabb1,ccode2,stateabb2,year,conttype
+"A variable that combines the two states' COW country codes in a way that facilitates
+merging with other dyadic data. This takes the format AAABBB, where AAA is the lower value
+of the two country codes and BBB is the higher value.",,,,,,"1: land contiguity, 
+2: water contiguity by 12 miles,
+3: water contiguity by 24 miles,
+4: water contiguity by 150 miles, 
+5: water contiguity by 400 miles"

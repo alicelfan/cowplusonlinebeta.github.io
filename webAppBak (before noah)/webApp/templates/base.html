@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>{% block title %}{% endblock %}</title>
+    <meta charset="utf-8" />
+    <meta name="description" content="COW Plus Online data manager is an online platform for managing data related to international relations, primarily international conflict. If you are conducting research on war or international security, this platform will help you create a comprehensive and easily manipulable dataset for quantitative analysis.">
+    <meta name="keywords" content="COW Plus Online, Professor Poast COW Plus Online, data management software ir, correlates of war, international relations data">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- Replace this link with Flatly theme CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/4.3.1/flatly/bootstrap.min.css" rel="stylesheet">
+	<style>
+        .centered-layout {
+            margin: 0 auto;
+            max-width: 1200px; /* Adjust this value based on your preference */
+        }
+        .header-center {
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+    {% block head %}
+    {% endblock %} 
+</head>
+<body>
+	<div class="centered-layout">
+		{% block scripts %}
+		{% endblock %}
+		<header>
+			<h1 class="header-center">COW Plus Online (Beta)</h1>
+			<br>
+			<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+				<div class="container-fluid">
+					<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor04" aria-controls="navbarColor04" aria-expanded="false" aria-label="Toggle navigation">
+						<span class="navbar-toggler-icon"></span>
+					</button>
+			
+					<div class="collapse navbar-collapse" id="navbarColor04">
+						<ul class="navbar-nav me-auto">
+							<li class="nav-item">
+								<a class="nav-link active" href="index.html">Home</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link" href="dataUnlimVar.html">Data</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link" href="download.html">Downloads</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link" href="upload">Upload</a>
+							</li>
+						</ul>
+						<div class="d-flex justify-content-end">
+							<ul class="navbar-nav">
+								<li class="nav-item">
+									{% if 'user' in session %}
+										<a class="nav-link" href="{{ url_for('logout') }}">Logged in as {{ session['user'] }} (Logout)</a>
+									{% else %}
+										<a class="nav-link" href="{{ url_for('login') }}">Login</a>
+									{% endif %}
+								</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</nav>
+			
+		</header>
+		<br>
+		{% with messages = get_flashed_messages() %}
+			{% if messages %}
+				{% for message in messages %}
+				<p>{{ message }}</p>
+				{% endfor %}
+			{% endif %}
+		{% endwith %}
+		{% block content %}
+		{% endblock %}
+		<footer id="footer" class="text-center py-4">
+			<p>&copy; <script>document.write( new Date().getFullYear() );</script> COW Plus Online</p>
+			<ul class="list-inline">
+				<li class="list-inline-item"><a href="index.html">Home</a></li>
+				<li class="list-inline-item"><a href="dataUnlimVar.html">Data</a></li>
+				<li class="list-inline-item"><a href="download.html">Downloads</a></li>
+				<li class="list-inline-item"><a href="sources.html">Sources</a></li>
+				<li class="list-inline-item"><a href="mailto:paulpoast@uchicago.edu">Contact</a></li>
+			</ul>
+		</footer>
+	</div>
+</body>
+</html>

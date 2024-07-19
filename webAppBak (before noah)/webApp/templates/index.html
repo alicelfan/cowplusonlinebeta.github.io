@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}COW Plus Online | Home{% endblock %}
+{% block linkindex %}class = "active"{% endblock %}
+{% block content %}
+<div id = "intro">
+	<p>Welcome to the beta-version of COW Plus Online! </p>
+	<p>COW Plus Online data manager is online platform for managing data related to international relations, primarily international conflict. If you are conducting research on war or international security, this platform will help you create a comprehensive and easily manipulable dataset for quantitative analysis.</p>
+	<p>COW Plus Online guides you step-by-step through the process of selecting an appropriate unit of analysis (e.g. a country-year), year range (e.g. all years from 1900 to 2000), countries to include in your analysis (e.g. all countries), and, most importantly, variables to include (e.g. whether two states had a conflict or share an alliance commitment).</p>
+	<p>The "COW" in the name stands for "Correlates of War", the long-standing <a href="https://correlatesofwar.org/" target = "_blank" rel="noreferrer noopener">project</a> aimed at collecting data on war and international security.  Data from that project comprise the core of the data available on COW Plus Online.  The "Plus" in the name indicates that the data available in this platform are not limited to those from the COW project. New data, from COW and other projects, are being added all the time!</p>
+	<p>COW Plus Online is the third generation of software for managing international security data. The first generation was the original and widely used <a href="https://www.tandfonline.com/doi/abs/10.1080/03050620008434965" target = "_blank" rel="noreferrer noopener">EuGene software.</a> The second generation was the <a href="https://journals.sagepub.com/doi/full/10.1177/0022002718824635" target = "_blank" rel="noreferrer noopener">NewGene software</a>, which sought to broaden the applicability and usability of EuGene.  Both of those were desktop-based software programs. In contrast to these platforms, COW Plus Online draws inspiration from the <a href="https://growup.ethz.ch/rfe" target = "_blank" rel="noreferrer noopener">GROWUP</a> sub-national conflict data platform by being fully online and, like the <a href="https://svmiller.com/peacesciencer/" target = "_blank" rel="noreferrer noopener">peacesciencer</a> package for the R software, is not dependent on the user having a particular operating system (such as Windows).</p>
+	<p>Questions? Contact <a href ="mailto:paulpoast@uchicago.edu">Paul Poast</a>.</p>
+</div>
+{% endblock %}

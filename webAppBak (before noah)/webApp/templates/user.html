@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}COW Plus | User Info{% endblock %}
+{% block content %}
+
+<form action="#" method="POST">
+	<p>Change Email:</p>
+	<input autocomplete="off" type="email" name="email" placeholder="Enter Email" value="{{email if email}}"/>
+	<br>
+	<input type="submit" value="Save"/>
+</form>
+<br>
+{% endblock %}

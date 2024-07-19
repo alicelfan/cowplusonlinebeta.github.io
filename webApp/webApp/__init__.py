@@ -16,6 +16,12 @@ import csv
 import pandas as pd
 import numpy as np
 import logging
+# new imports
+import io
+import time
+import threading
+from threading import Lock
+import queue
 sys.path.append('C:\cowplusonlinebeta.github.io\webApp\webApp')
 import openconfig
 from flask import request
@@ -29,8 +35,13 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 ALLOWED_EXTENSIONS = {'txt', 'csv'}
 python_files_dir = os.path.join(current_dir, 'python_files')
 upload_files_dir = os.path.join(current_dir, 'datafiles_csv')
-
 config = openconfig.read_config()
+citations = {}
+with open(config['BASE'] + "/citations.txt", 'r') as file:
+    for line in file:
+        key, value = line.strip().split('=')
+        citations[key] = value
+
 # UPLOAD_FOLDER , SQLALCHEMY_DATABASE_URI
 
 logging.basicConfig(level=logging.INFO)
@@ -52,6 +63,23 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 mail = Mail(app)
 bcrypt = Bcrypt(app)
+task_queue = queue.Queue()
+route_lock = Lock()
+
+# TASK WORKER FOR ACTIONS THAT REQUIRE NON CONCURRENCE
+def task_worker():
+    while True:
+        # get the next task; this is blocking if the queue is empty
+        task_func = task_queue.get()
+        try:
+            task_func()
+        finally:
+            # signal that the task is done
+            task_queue.task_done()
+
+worker_thread = threading.Thread(target=task_worker)
+worker_thread.daemon = True  # Daemon threads exit when the program does
+worker_thread.start()
 
 class users(db.Model):
     _id = db.Column("id", db.Integer, primary_key=True)
@@ -70,8 +98,6 @@ class users(db.Model):
         self.is_confirmed = is_confirmed
         self.confirmed_on = confirmed_on
 
-
-
 vc = []
 vc2 = []
 dc = []
@@ -86,7 +112,7 @@ d_files = []
 all_d_files = []
 all_m_files = []
 
-# local path
+# local path []
 sys.path.append(python_files_dir)
 import variables
 import upload
@@ -122,6 +148,9 @@ def sendverification(code):
        smtp.login(email_sender, email_password)
        smtp.sendmail(email_sender, email_receiver, em.as_string())
    return "sent"
+
+def create_citations():
+    return
 
 @app.route('/get-username')
 def get_username():
@@ -294,6 +323,8 @@ def goto_dataUnlimVar():
     else:
         print("no user in session")
         directory_to_check = config["UPLOAD_FOLDER"] + "/test_profile"
+    if not os.path.isdir(directory_to_check):
+        os.makedirs(directory_to_check)
     if request.method == 'POST':
         return render_template("dataUnlimVar.html")
     else:
@@ -406,6 +437,7 @@ def login():
         return render_template("login.html")
 
 @app.route("/signup", methods=["POST", "GET"])
+
 def signup():
     if request.method == "POST":
         log("signup")
@@ -428,26 +460,28 @@ def signup():
         if found_user or found_email:
             flash("User already exists.")
             return render_template("signup.html")
-
-        else:
-            if user and em and pwd:
-                if ("@" in em) and ("." in em):
-                    flash("User created")
-                    hashed_pwd = bcrypt.generate_password_hash(pwd).decode('utf-8')
-                    usr = users(user, em, hashed_pwd)
-                    db.session.add(usr)
-                    db.session.commit()
-                    session["user"] = user
-                    session["email"] = em
-                    session["verified"] = False
-                    os.mkdir(os.path.join(config["UPLOAD_FOLDER"], session["user"])) #testthis
-                    return redirect(url_for("verify"))
-                else:
-                    flash("Enter a valid email")
-                    return render_template("signup.html")
+        
+        if user and em and pwd:
+            if "@" in em and "." in em:
+                hashed_pwd = bcrypt.generate_password_hash(pwd).decode('utf-8')
+                usr = users(name=user, email=em, password=hashed_pwd)  # assuming the 'users' model takes these parameters
+                db.session.add(usr)
+                db.session.commit()
+                
+                session["user"] = user
+                session["email"] = em
+                session["verified"] = False
+                
+                os.mkdir(os.path.join(config["UPLOAD_FOLDER"], session["user"]))
+                
+                flash("User created")
+                return redirect(url_for("verify"))
             else:
-                flash("Please fill out all fields")
+                flash("Enter a valid email")
                 return render_template("signup.html")
+        else:
+            flash("Please fill out all fields")
+            return render_template("signup.html")
     else:
         if "user" in session:
             flash("Already logged in!")
@@ -483,6 +517,54 @@ def verify():
                 print(session["code"])
                 return render_template("verify.html")
     return redirect(url_for("login"))
+
+from flask import send_file
+from io import StringIO, BytesIO
+file_contents = []
+
+@app.route("/import.html", methods=["POST", "GET"])
+def importdata():
+    IMPORT_FOLDER = app.config['UPLOAD_FOLDER'].replace("datafiles_csv", "datasets_shared")
+    print("dbg: IMPORT_FOLDER = " + IMPORT_FOLDER)
+    if request.method == 'POST':
+        if 'file' in request.files:
+            files = request.files.getlist('file')
+            for file in files:
+                if file.filename == '':
+                    continue
+                filename = secure_filename(file.filename)
+                file.save(os.path.join(IMPORT_FOLDER, filename))
+                # Read the content of the file and store it
+
+    files = os.listdir(IMPORT_FOLDER)
+    file_contents = [{'filename': f} for f in files]
+
+    return render_template("import.html", file_contents=file_contents)
+
+@app.route("/delete", methods=["POST"])
+def delete_file():
+    global file_contents
+    filename_to_delete = request.form['filename']
+    # Remove the file from file_contents
+    file_contents = [file_data for file_data in file_contents if file_data['filename'] != filename_to_delete]
+    return redirect(url_for('importdata'))
+
+@app.route("/download", methods=["POST"])
+def download_file():
+    filename_to_download = request.form['filename']
+    for file_data in file_contents:
+        if file_data['filename'] == filename_to_download:
+            # Create a CSV in memory
+            output = StringIO()
+            writer = csv.writer(output)
+            writer.writerows(file_data['content'])
+            output.seek(0)
+
+            return send_file(BytesIO(output.getvalue().encode()), 
+                mimetype='text/csv', 
+                as_attachment=True, 
+                download_name=filename_to_download)
+    return redirect(url_for('importdata'))
 
 @app.route("/user", methods=["POST", "GET"])
 def user():
@@ -572,7 +654,8 @@ def processvc():
     global vc
     data = request.get_json()
     vc = data['array']
-    return 'okay' # replace
+    print()
+    return ''
 
 @app.route('/variableChooser2', methods=['POST'])
 def processvc2():
@@ -580,7 +663,7 @@ def processvc2():
     data = request.get_json()
     t = data['array']
     vc = vc + t
-    return 'okay' # replace
+    return ''
 
 # datasetChooser()
 @app.route('/datasetChooser', methods=['POST'])
@@ -615,65 +698,90 @@ def create_df():
 
     global dc
     global vc
+    
     print("creating dataframe")
-    i = 0
-    while i < len(dc):
-        if dc[i] is None:
-            dc = dc[:i] + dc[i+1:]
-        else:
-            i += 1
-    i = 0
-    while i < len(vc):
-        if vc[i] is None:
-            vc = vc[:i] + vc[i+1:]
-        else:
-            i += 1
-    if "user" in session:
-        dataframe = data_merger.createNewDataList(dc, vc, session["user"]) # datasetChooser, variableChooser
+    if route_lock.acquire(blocking=False):
+        try:
+            i = 0
+            while i < len(dc):
+                if dc[i] is None:
+                    dc = dc[:i] + dc[i+1:]
+                else:
+                    i += 1
+            i = 0
+            while i < len(vc):
+                if vc[i] is None:
+                    vc = vc[:i] + vc[i+1:]
+                else:
+                    i += 1
+            if "user" in session:
+                dataframe = data_merger.createNewDataList(dc, vc, session["user"]) # datasetChooser, variableChooser
+            else:
+                dataframe = data_merger.createNewDataList(dc, vc, "test_profile") # datasetChooser, variableChooser
+            dataframe = dataframe.drop(["eventID"], axis = 1)
+            sample = dataframe.loc[:999]
+            stateabb_vals = []
+            stateabb1_vals = []
+            stateabb2_vals = []
+            if "stateabb" in dataframe.columns:
+                stateabb_values = dataframe['stateabb'].unique()
+                stateabb_vals = sorted(stateabb_values)
+            if "stateabb1" in dataframe.columns:
+                stateabb1_values = dataframe['stateabb1'].unique()
+                stateabb1_vals = sorted(stateabb1_values)
+            if "stateabb2" in dataframe.columns:
+                stateabb2_values = dataframe['stateabb2'].unique()
+                stateabb2_vals = sorted(stateabb2_values)
+            if len(stateabb_vals) > 0:
+                state_columns_dict = {'stateabb': stateabb_vals}
+                state_columns = pd.DataFrame(data=[state_columns_dict])
+            elif (len(stateabb1_vals) > 0) & (len(stateabb2_vals) >0):
+                state1_columns_dict = {'stateabb1': stateabb1_vals} 
+                state2_columns_dict = {'stateabb2': stateabb2_vals}
+                state_columns1 = pd.DataFrame(data=[state1_columns_dict])
+                state_columns2 = pd.DataFrame(data=[state2_columns_dict])
+            print("converting to json...")
+            new_df = sample.to_json(orient="records")
+            dataframe2 = dataframe.copy(deep = True)
+            if len(stateabb_vals) > 0:
+                response = {
+                    "message": "data processing successful",
+                    "status": 200,
+                    "new_df": new_df,
+                    "state_columns": state_columns.to_json(orient = "values")
+                }
+            elif (len(stateabb1_vals) > 0) & (len(stateabb2_vals) >0):
+                response = {
+                    "message": "data processing successful",
+                    "status": 200,
+                    "new_df": new_df,
+                    "state_columns1": state_columns1.to_json(orient = "values"),
+                    "state_columns2": state_columns2.to_json(orient = "values")
+                }
+        finally:
+            route_lock.release()
+        return response
     else:
-        dataframe = data_merger.createNewDataList(dc, vc, "test_profile") # datasetChooser, variableChooser
-    dataframe = dataframe.drop(["eventID"], axis = 1)
-    sample = dataframe.loc[:999]
-    stateabb_vals = []
-    stateabb1_vals = []
-    stateabb2_vals = []
-    if "stateabb" in dataframe.columns:
-        stateabb_values = dataframe['stateabb'].unique()
-        stateabb_vals = sorted(stateabb_values)
-    if "stateabb1" in dataframe.columns:
-        stateabb1_values = dataframe['stateabb1'].unique()
-        stateabb1_vals = sorted(stateabb1_values)
-    if "stateabb2" in dataframe.columns:
-        stateabb2_values = dataframe['stateabb2'].unique()
-        stateabb2_vals = sorted(stateabb2_values)
-    if len(stateabb_vals) > 0:
-        state_columns_dict = {'stateabb': stateabb_vals}
-        state_columns = pd.DataFrame(data=[state_columns_dict])
-    elif (len(stateabb1_vals) > 0) & (len(stateabb2_vals) >0):
-        state1_columns_dict = {'stateabb1': stateabb1_vals} 
-        state2_columns_dict = {'stateabb2': stateabb2_vals}
-        state_columns1 = pd.DataFrame(data=[state1_columns_dict])
-        state_columns2 = pd.DataFrame(data=[state2_columns_dict])
-    print("converting to json...")
-    new_df = sample.to_json(orient="records")
-    dataframe2 = dataframe.copy(deep = True)
-    if len(stateabb_vals) > 0:
-        response = {
-            "message": "data processing successful",
-            "status": 200,
-            "new_df": new_df,
-            "state_columns": state_columns.to_json(orient = "values")
-        }
-    elif (len(stateabb1_vals) > 0) & (len(stateabb2_vals) >0):
-        response = {
-            "message": "data processing successful",
-            "status": 200,
-            "new_df": new_df,
-            "state_columns1": state_columns1.to_json(orient = "values"),
-            "state_columns2": state_columns2.to_json(orient = "values")
-        }
-    return response
+        print("dbg: resource busy; lock engaged")
+        return "Resource is busy, please try again in a moment", 429
 
+@app.route("/locktest")
+def locktest():
+    logging.info("Request received, attempting to acquire lock.")
+    acquired = route_lock.acquire(blocking=False)
+    if acquired:
+        try:
+            
+            logging.info("Lock acquired, processing...")
+            time.sleep(30)
+            logging.info("Processing complete, releasing lock.")
+            return "DataFrame created or modified successfully"
+        finally:
+            route_lock.release()
+            logging.info("Lock released.")
+    else:
+        logging.info("Could not acquire lock, resource is busy.")
+        return "Resource is busy, please try in a moment", 429
 @app.route('/getStateColumns', methods=['POST', "GET"])
 def getStateColumns():
     global dataframe
@@ -733,8 +841,10 @@ def back_button_2():
 def create_df_secondstep():
     global dataframe
     global dataframe2
-    dataframe2 = data_merger.createNewDataListSecondStep(dataframe, dcss, vcss, dc, vc, session["user"])
-    dataframe2 = dataframe2.drop(["eventID_state1"], axis = 1)
+    if "user" in session:
+        dataframe2 = data_merger.createNewDataListSecondStep(dataframe, dcss, vcss, dc, vc, session["user"]) # datasetChooser, variableChooser
+    else:
+        dataframe2 = data_merger.createNewDataListSecondStep(dataframe, dcss, vcss, dc, vc, "test_profile")
     dataframe2 = dataframe2.drop(["eventID_state2"], axis = 1)
     sample2 = dataframe2.loc[:999]
     print("converting to json...")
@@ -779,13 +889,21 @@ def test_download():
     response.headers['Content-Type'] = 'text/csv'
     return response
 
-@app.route('/popup/<message>')
-def popup(message):
-    return render_template('popup.html', message=message)
+@app.route('/downloadCitations/', methods=['POST', "GET"])
+def downloadCitations():
+    print("dbg.dc: " + str(dc))
+    citations_text = "\n".join([f"{citations[name]}" for name in dc if name in citations])
+    
+    # Convert the string to a BytesIO object
+    buffer = io.BytesIO()
+    buffer.write(citations_text.encode('utf-8'))
+    buffer.seek(0)
+    today = datetime.now()
+    return send_file(buffer, as_attachment=True, download_name=f"citations_{today.strftime('%Y%m%d_%H%M%S')}.txt", mimetype='text/plain')
 
 @app.route('/downloadDf/', methods=['POST', "GET"])
 def downloadCSV():
-    global dataframe2, chng_df, yearMin, yearMax, stateOneFilter, stateTwoFilter
+    global dataframe2, chng_df, yearMin, yearMax, stateOneFilter, stateTwoFilter, dc
     chng_df = dataframe2.copy(deep = True)
     today = datetime.now()
     if yearMin == "":
@@ -806,7 +924,11 @@ def downloadCSV():
     response.headers['Content-Disposition'] = "attachment; filename=" + filename
     response.headers['Content-Type'] = 'text/csv'
     print("csv converted")
-    return response
+    return Response(
+       chng_df.to_csv(),
+       mimetype="text/csv",
+       headers={"Content-disposition":
+       "attachment; filename=cowplus_online_"+str(today.year) + str(today.month) + str(today.day) + "_" + str(today.hour) + "_" + str(today.minute) + "_" + str(today.second) + ".csv"})
 
 # generic for all req. to save code
 

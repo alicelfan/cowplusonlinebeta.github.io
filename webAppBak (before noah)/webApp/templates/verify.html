@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}COW Plus | Verification{% endblock %}
+{% block content %}
+<p>Your email is not verified! Check your inbox (and spam) for a verification email.</p>
+<p>Don't see anything? Reload the page to resend it.</p>
+<form action="#" method="POST">
+    <input autocomplete="off" type="text" name="code" placeholder="Enter Code"/>
+	<br>
+	<input type="submit" value="Submit"/>
+</form>
+{% endblock %}

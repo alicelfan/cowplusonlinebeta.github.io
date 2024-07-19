@@ -956,6 +956,16 @@ function checkCheckboxes(){
 	return Boolean(tf);
 }
 
+function hideBusyMessage() {
+	const busyMessage = document.getElementById('busyMessage');
+	busyMessage.style.display = 'none';
+}
+  
+function showBusyMessage() {
+	const busyMessage = document.getElementById('busyMessage');
+	busyMessage.style.display = 'block';
+}
+
 function hideLoadingMessage() {
 	const loadingMessage = document.getElementById('loadingMessage');
 	loadingMessage.style.display = 'none';
@@ -1023,6 +1033,7 @@ function BackButtonOne(){
 	document.getElementById("SecondStepVars").style.display = "none";
 	document.getElementById("backButton2").style.display = "none";
 	document.getElementById("downloadButton").style.display = "none";
+	document.getElementById("downloadButton2").style.display = "none";
 	$('#SecondStep').find('input[type=checkbox]:checked').prop('checked',false);
 	$('#SecondStep').find('input[type=radio]:checked').prop('checked',false);
 	document.getElementById("myTable").style.display = "none";
@@ -1064,6 +1075,7 @@ function BackButtonTwo(){
 		document.getElementById("grid_vars_second_step").style.display = "none";
 		document.getElementById("backButton2").style.display = "none";
 		document.getElementById("downloadButton").style.display = "none";
+		document.getElementById("downloadButton2").style.display = "none";
 		// document.getElementById("variableTablesSecondStep").style.display = "none";
 		$('#SecondStep').find('input[type=checkbox]:checked').prop('checked',false);
 		$('#SecondStep').find('input[type=radio]:checked').prop('checked',false);
@@ -1083,6 +1095,7 @@ function BackButtonTwo(){
 		document.getElementById("backButton1").style.display = "none";
 		document.getElementById("backButton2").style.display = "none";
 		document.getElementById("downloadButton").style.display = "none";
+		document.getElementById("downloadButton2").style.display = "none";
 		document.getElementById("FirstStep").style.display = "block";
 		document.getElementById("grid_vars_first_step").style.display = "block";
 		document.getElementById("SecondStep").style.display = "none";
@@ -1426,6 +1439,7 @@ function changeButtonSecondStep(){
 	document.getElementById("backButton1").style.display = "none";
 	document.getElementById("backButton2").style.display = "inline-block";
 	document.getElementById("downloadButton").style.display = "inline-block";
+	document.getElementById("downloadButton2").style.display = "inline-block";
 	document.getElementById("SecondStep").style.display = "none";
 	document.getElementById("grid_vars_first_step").style.display = "none";
 	document.getElementById("grid_vars_second_step").style.display = "none";
@@ -1908,7 +1922,13 @@ async function retrieveCSVThirdStep() {
 }
 
 async function exportTableToCSV(filename) {
-	var csv = await retrieveCSVThirdStep();
+	await filterGrid();
+	location.replace('downloadDf')
+}
+
+async function exportCitations(filename) {
+	await filterGrid();
+	location.replace('downloadCitations')
 }
 
 

@@ -1,16 +1,6 @@
 import os
 import pandas as pd
 
-def read_config(file_path):
-    config = {}
-    with open(file_path, 'r') as file:
-        for line in file:
-            key, value = line.strip().split('=')
-            config[key] = value
-    return config
-
-config = read_config('C:\webApp\webApp\config.txt')
-
 def merge_csv_files(directory, output_file):
     merged_df = None
 

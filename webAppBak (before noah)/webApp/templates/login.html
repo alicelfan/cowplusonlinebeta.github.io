@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}COW Plus | Login{% endblock %}
+
+{% block content %}
+<form action="#" method="POST">
+	<p>Login:</p>
+	<p><input autocomplete="off" type="text" name="nm" placeholder="Username/Email"/></p>
+	<p><input autocomplete="off" type="password" name="pwd" placeholder="Password"/></p>
+	<p><input autocomplete="off" type="submit" value="submit" /></p>
+</form>
+<p>Not a user? <a href="/signup">Sign up</a></p>
+{% endblock %}
