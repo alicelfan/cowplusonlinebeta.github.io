@@ -742,6 +742,13 @@ def create_df():
                 state_columns2 = pd.DataFrame(data=[state2_columns_dict])
             print("converting to json...")
             new_df = sample.to_json(orient="records")
+
+            if "user" in session:
+                csv_file_path = config["UPLOAD_FOLDER"] + "/" + session["user"] + "/temp.csv"
+                print("dbg.csv_file_path = " + csv_file_path)
+                os.makedirs(os.path.dirname(csv_file_path), exist_ok=True)
+                sample.to_csv(csv_file_path, index=False)
+
             dataframe2 = dataframe.copy(deep = True)
             if len(stateabb_vals) > 0:
                 response = {
@@ -763,7 +770,7 @@ def create_df():
         return response
     else:
         print("dbg: resource busy; lock engaged")
-        return "Resource is busy, please try again in a moment", 429
+        return redirect("busy.html")
 
 @app.route("/locktest")
 def locktest():
@@ -849,6 +856,12 @@ def create_df_secondstep():
     sample2 = dataframe2.loc[:999]
     print("converting to json...")
     new_df = sample2.to_json(orient="records")
+
+    if "user" in session:
+        csv_file_path = config["UPLOAD_FOLDER"] + "/" + session["user"] + "/temp.csv"
+        print("dbg.csv_file_path = " + csv_file_path)
+        os.makedirs(os.path.dirname(csv_file_path), exist_ok=True)
+        sample2.to_csv(csv_file_path, index=False)
     
     response = {
         "message": "data processing successful",
@@ -891,6 +904,9 @@ def test_download():
 
 @app.route('/downloadCitations/', methods=['POST', "GET"])
 def downloadCitations():
+    if "user" not in session:
+        flash("You must be logged in to download citations.")
+        return redirect(url_for("login"))
     print("dbg.dc: " + str(dc))
     citations_text = "\n".join([f"{citations[name]}" for name in dc if name in citations])
     
@@ -904,7 +920,10 @@ def downloadCitations():
 @app.route('/downloadDf/', methods=['POST', "GET"])
 def downloadCSV():
     global dataframe2, chng_df, yearMin, yearMax, stateOneFilter, stateTwoFilter, dc
-    chng_df = dataframe2.copy(deep = True)
+    if "user" not in session:
+        flash("You must be logged in to download CSV files.")
+        return redirect(url_for("login"))
+    chng_df = pd.read_csv(config["UPLOAD_FOLDER"] + "/" + session["user"] + "/temp.csv")
     today = datetime.now()
     if yearMin == "":
         yearMin = 1000

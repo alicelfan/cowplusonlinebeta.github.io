@@ -1,2 +1,0 @@
-UPLOAD_FOLDER=C:/cowplusonlinebeta.github.io/webApp/webApp/datafiles_csv
-SQLALCHEMY_DATABASE_URI=sqlite:////cowplusonlinebeta.github.io/webApp/webApp/instance/users.sqlite3
