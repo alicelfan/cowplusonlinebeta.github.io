@@ -39,7 +39,13 @@ def remove_items(test_list, item):
     res = [i for i in test_list if i != item]
     return res
 
+def delete_item(test_list, index):
+ 
+    # using list comprehension to perform the task
+    del test_list[index]
+    return test_list
 
+#variable ids - name + filename
 def createVarIDsDict(username):
     directory_uploaded = os.path.join(config["UPLOAD_FOLDER"], username)
     all_dictionary = {}
@@ -84,7 +90,8 @@ def createVarIDsDict(username):
                 secondstep_dictionary[i] = {'vars' : temp_list}
             i = i+1
     return all_dictionary, secondstep_dictionary
-    
+
+#variable name; variable type; variable preloaded/uploaded
 def createVarDict(username):
     directory_uploaded = os.path.join(config["UPLOAD_FOLDER"], username)
     all_dictionary = {}
@@ -153,6 +160,7 @@ def createVarDict(username):
             i = i+1
     return all_dictionary, secondstep_dictionary
 
+#variable descriptions
 def createVarDescripDict(username):
     directory_uploaded = os.path.join(config["UPLOAD_FOLDER"], username)
     all_dictionary = {}
@@ -164,16 +172,7 @@ def createVarDescripDict(username):
         if os.path.isfile(f):
             temp_file = pd.read_csv(f, sep=",")
             temp_list = temp_file.iloc[0].tolist().copy()
-            temp_list = remove_items(temp_list, "stateabb")
-            temp_list = remove_items(temp_list, "stateabb1")
-            temp_list = remove_items(temp_list, "stateabb2")
-            temp_list = remove_items(temp_list, "ccode1")
-            temp_list = remove_items(temp_list, "ccode2")
-            temp_list = remove_items(temp_list, "ccode")
-            temp_list = remove_items(temp_list, "year")
-            temp_list = [x for x in temp_list if str(x) != 'nan']
-            for j in range(len(temp_list)):
-                temp_list[j] = temp_list[j]
+            temp_list = [x for x in temp_list if str(x) != 'nan'] #since descriptions for stateabb, ccode, year, etc. are all nans, they are not included in temp_list
             all_dictionary[i] = {'vars' : temp_list}
             if(column_check(temp_file, monadic_reqcol)):
                 secondstep_dictionary[i] = {'vars' : temp_list}
@@ -184,13 +183,59 @@ def createVarDescripDict(username):
         if os.path.isfile(f):
             temp_file = pd.read_csv(f, sep=",")
             temp_list = temp_file.iloc[0].tolist().copy()
-            temp_list = remove_items(temp_list, "nan")
-            temp_list = remove_items(temp_list, "stateabb1")
-            temp_list = remove_items(temp_list, "stateabb2")
-            temp_list = remove_items(temp_list, "ccode1")
-            temp_list = remove_items(temp_list, "ccode2")
-            temp_list = remove_items(temp_list, "ccode")
-            temp_list = remove_items(temp_list, "year")
+            temp_columns = temp_file.columns.tolist().copy()
+            if(column_check(temp_file, monadic_reqcol)):
+                idx_state = temp_columns.index("stateabb")
+                idx_ccode = temp_columns.index("ccode")
+                idx_year_m = temp_columns.index("year")
+                temp_list = delete_item(temp_list, idx_state)
+                if(idx_ccode > idx_state):
+                    idx_ccode = idx_ccode - 1
+                temp_list = delete_item(temp_list, idx_ccode)
+                if(idx_year_m > idx_state):
+                    idx_year_m = idx_year_m - 1
+                if(idx_year_m > idx_ccode):
+                    idx_year_m = idx_year_m - 1
+                temp_list = delete_item(temp_list, idx_year_m)
+            elif (column_check(temp_file,dyadic_reqcol)):
+                idx_state_one = temp_columns.index("stateabb1")
+                idx_state_two = temp_columns.index("stateabb2")
+                idx_ccode_one = temp_columns.index("ccode1")
+                idx_ccode_two = temp_columns.index("ccode2")
+                idx_year_d = temp_columns.index("year")
+                temp_list = delete_item(temp_list, idx_state_one) # state one
+                #state two
+                if(idx_state_two > idx_state_one):
+                    idx_state_two = idx_state_two - 1
+                temp_list = delete_item(temp_list, idx_state_two)
+                #ccode one
+                if(idx_ccode_one > idx_state_one):
+                    idx_ccode_one = idx_ccode_one - 1
+                if(idx_ccode_one > idx_state_two):
+                    idx_ccode_one = idx_ccode_one - 1
+                temp_list = delete_item(temp_list, idx_ccode_one)
+                #ccode 2
+                if(idx_ccode_two > idx_state_one):
+                    idx_ccode_two = idx_ccode_two - 1
+                if(idx_ccode_two > idx_state_two):
+                    idx_ccode_two = idx_ccode_two - 1
+                if(idx_ccode_two > idx_ccode_one):
+                    idx_ccode_two = idx_ccode_two - 1
+                temp_list = delete_item(temp_list, idx_ccode_two)
+                #year
+                if(idx_year_d > idx_state_one):
+                    idx_year_d = idx_year_d - 1
+                if(idx_year_d > idx_state_two):
+                    idx_year_d = idx_year_d - 1
+                if(idx_year_d > idx_ccode_one):
+                    idx_year_d = idx_year_d - 1
+                if(idx_year_d > idx_ccode_two):
+                    idx_year_d = idx_year_d - 1
+                temp_list = delete_item(temp_list, idx_year_d)
+            #find index of stateabb, ccode, year, etc in temp_file.columns
+            #set int variable = to index
+            #remove index position in temp_list.iloc[0]
+            #if index position of new thing to be removed < removed; index stays same; else: index-1
             all_dictionary[i] = {'vars' : temp_list}
             if(column_check(temp_file, monadic_reqcol)):
                 secondstep_dictionary[i] = {'vars' : temp_list}
@@ -199,6 +244,7 @@ def createVarDescripDict(username):
     df = pd.DataFrame.from_dict(dictionary, orient='index',columns=['vars'])
     return df.to_json(orient="values")
 
+#which dataset does each variable belong to
 def createVarDatasetDict(username):
     directory_uploaded = os.path.join(config["UPLOAD_FOLDER"], username)
     all_dictionary = {}

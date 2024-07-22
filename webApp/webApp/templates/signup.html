@@ -4,11 +4,15 @@
 {% block content %}
 <form action="#" method="POST">
 	<p>Sign up:</p>
-	<p>Note: Do not use a password you regularly use for other websites<br>
-		Website security has not been throughly tested<br></p>
+	<p>Note: Do not use a password you regularly use for other websites.<br>
+		We are taking measures to make the web app as secure as we can, but we have not been able to test the security throughly.<br></p>
 	<p><input autocomplete="off" type="text" name="nm" placeholder="Username"/></p>
 	<p><input autocomplete="off" type="email" name="em" placeholder="Email"/></p>
 	<p><input autocomplete="off" type="password" name="pwd" placeholder="Password"/></p>
-	<p><input type="submit" value="submit" /></p>
+	<input type="checkbox" id="privacy_policy" name="privacy_policy" value="privacy_policy" onclick="checkAgreements()">
+	<label for="privacy_policy"> By signing up for COWPlusOnline, you agree to our <a href="privacy_policy.html">Privacy Policy</a>.</label><br>
+	<input type="checkbox" id="tos" name="tos" value="tos" onclick="checkAgreements()">
+	<label for="tos"> By signing for to COWPlusOnline, you agree to our <a href="terms_of_service.html">Terms of Service</a>.</label><br>
+	<p><input type="submit" value="Submit" id="signupButtonSubmit" disabled/></p>
 </form>
 {% endblock %}

@@ -1,6 +1,5 @@
-from flask import Flask, cli, Response, flash, render_template, request, redirect, url_for, request, jsonify, session, make_response
+from flask import Flask, cli, send_file, Response, flash, render_template, request, redirect, url_for, request, jsonify, session, make_response
 from werkzeug.utils import secure_filename
-
 from datetime import *
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -282,26 +281,11 @@ def remove_admin(username):
         return redirect(url_for('login'))  # redirect unauthorized users
     return redirect("/panel")
 
-@app.route('/upload', methods=['GET', 'POST'])
-def upload_file():
+@app.route('/upload.html', methods=['GET', 'POST'])
+def goto_upload():
     if "user" in session:
         if session["verified"] == True:
             print(session["verified"])
-            if request.method == 'POST':
-                # check if the post request has the file part
-                if 'file' not in request.files:
-                    flash('No file part')
-                    return redirect(request.url)
-                file = request.files['file']
-                # If the user does not select a file, the browser submits an
-                # empty file without a filename.
-                if file.filename == '':
-                    flash('No selected file')
-                    return redirect(request.url)
-                if file and allowed_file(file.filename):
-                    filename = secure_filename(file.filename)
-                    file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                    return redirect(url_for('download_file', name=filename))
             return render_template("upload.html")
         else:
             return redirect(url_for("verify"))
@@ -312,6 +296,18 @@ def upload_file():
 @app.route("/index.html")
 def goto_index():
     return render_template("index.html")
+
+@app.route("/guides.html")
+def goto_guide():
+    return render_template("guides.html")
+
+@app.route("/privacy_policy.html")
+def goto_privacy_policy():
+    return render_template("privacy_policy.html")
+
+@app.route("/terms_of_service.html")
+def goto_tos():
+    return render_template("terms_of_service.html")
 
 @app.route("/dataUnlimVar.html", methods=["POST", "GET"])
 def goto_dataUnlimVar():
@@ -355,19 +351,18 @@ def verifyFunction():
     print(files)
     os.chdir(config["UPLOAD_FOLDER"])
     # Iterate for each file in the files List, and Save them
-    for file in files:
-        file.save(file.filename)
-    m_files, d_files, g_files, b_files = upload.verify_files(files)
-    if(len(b_files) == 0):
-        verified = True
-    print(m_files)
-    print(d_files)
-    print(g_files)
-    print(b_files)
-    for f in g_files:
-        os.remove(f)
-    for f in b_files:
-        os.remove(f)
+    if files[0].filename != "":
+        for file in files:
+           file.save(file.filename)
+        m_files, d_files, g_files, b_files = upload.verify_files(files)
+        if(len(b_files) == 0):
+            verified = True
+        for f in g_files:
+            os.remove(f)
+        for f in b_files:
+            os.remove(f)
+    if(len(files) == 0):
+        verified = False
     response = {
         "message": "data processing successful",
         "status": 200,
@@ -375,25 +370,30 @@ def verifyFunction():
         "bad_files": b_files,
         "verification": verified
     }
+    
     return response
 
-@app.route('/uploadFunction', methods = ['POST', 'GET'])
+@app.route('/uploadFunction/', methods = ['POST', 'GET'])
 def uploadFunction():
-    global all_m_files, all_d_files
-    print(m_files)
-    print(d_files)
+    global all_m_files, all_d_files, m_files, d_files
     for m in m_files:
         all_m_files.append(m)
     for d in d_files:
         all_d_files.append(d)
-    print(all_m_files)
-    print(all_d_files)
     files = request.files.getlist("file")
     username = session["user"]
+    directory_to_check = config["UPLOAD_FOLDER"] + "/" + username
+    if not os.path.isdir(directory_to_check):
+        os.makedirs(directory_to_check)
     os.chdir(os.path.join(config["UPLOAD_FOLDER"], username))
     for file in files:
         file.save(file.filename)
-    return redirect('/upload')
+        print("saved")
+    m_files = []
+    d_files = []
+    g_files = []
+    b_files = []
+    return redirect('/upload.html')
 
 @app.route("/login", methods=["POST", "GET"])
 def login():
@@ -436,8 +436,7 @@ def login():
             return redirect(url_for("user"))
         return render_template("login.html")
 
-@app.route("/signup", methods=["POST", "GET"])
-
+@app.route("/signup.html", methods=["POST", "GET"])
 def signup():
     if request.method == "POST":
         log("signup")
@@ -917,6 +916,7 @@ def downloadCitations():
     today = datetime.now()
     return send_file(buffer, as_attachment=True, download_name=f"citations_{today.strftime('%Y%m%d_%H%M%S')}.txt", mimetype='text/plain')
 
+
 @app.route('/downloadDf/', methods=['POST', "GET"])
 def downloadCSV():
     global dataframe2, chng_df, yearMin, yearMax, stateOneFilter, stateTwoFilter, dc
@@ -936,12 +936,6 @@ def downloadCSV():
     if (len(stateTwoFilter) != 0) & ("stateabb2" in chng_df.columns):
         chng_df = chng_df[chng_df['stateabb2'].isin(stateTwoFilter)]
     chng_df = chng_df.loc[(chng_df['year'] >= int(yearMin)) & (chng_df['year'] <= int(yearMax))] 
-    csv_content = chng_df.to_csv(index=False)
-    response = make_response(csv_content)
-    #/bm
-    filename = f"cowplus_online_{today.strftime('%Y%m%d_%H%M%S')}.csv"
-    response.headers['Content-Disposition'] = "attachment; filename=" + filename
-    response.headers['Content-Type'] = 'text/csv'
     print("csv converted")
     return Response(
        chng_df.to_csv(),
