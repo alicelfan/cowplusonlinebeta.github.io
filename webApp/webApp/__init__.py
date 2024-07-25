@@ -46,7 +46,7 @@ with open(config['BASE'] + "/citations.txt", 'r') as file:
 logging.basicConfig(level=logging.INFO)
 app = Flask(__name__, template_folder='templates')
 Bootstrap(app)
-app.secret_key = "yabujin"
+app.secret_key = "dJL1bnnSOCDi2Brtt04x"
 app.config['UPLOAD_FOLDER'] = config['UPLOAD_FOLDER']
 app.config['SQLALCHEMY_DATABASE_URI'] = config['SQLALCHEMY_DATABASE_URI']
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
