@@ -1,4 +1,4 @@
-from flask import Flask, cli, send_file, Response, flash, render_template, request, redirect, url_for, request, jsonify, session, make_response
+from flask import Flask, cli, Response, flash, render_template, request, redirect, url_for, request, jsonify, session, make_response, send_from_directory
 from werkzeug.utils import secure_filename
 from datetime import *
 from flask_sqlalchemy import SQLAlchemy
@@ -30,6 +30,7 @@ import os
 
 from datetime import date
 from datetime import datetime
+import shutil
 current_dir = os.path.dirname(os.path.abspath(__file__))
 ALLOWED_EXTENSIONS = {'txt', 'csv'}
 python_files_dir = os.path.join(current_dir, 'python_files')
@@ -38,8 +39,9 @@ config = openconfig.read_config()
 citations = {}
 with open(config['BASE'] + "/citations.txt", 'r') as file:
     for line in file:
-        key, value = line.strip().split('=')
-        citations[key] = value
+        if "#" not in line:
+            key, value = line.strip().split('=')
+            citations[key] = value
 
 # UPLOAD_FOLDER , SQLALCHEMY_DATABASE_URI
 
@@ -292,6 +294,32 @@ def goto_upload():
     else:
         flash("You are not logged in!")
         return redirect("/login")
+# needs verification... @alice
+def upload_file():
+    if "user" in session:
+        if session["verified"] == True:
+            print(session["verified"])
+            if request.method == 'POST':
+                # check if the post request has the file part
+                if 'file' not in request.files:
+                    flash('No file part')
+                    return redirect(request.url)
+                file = request.files['file']
+                # If the user does not select a file, the browser submits an
+                # empty file without a filename.
+                if file.filename == '':
+                    flash('No selected file')
+                    return redirect(request.url)
+                if file and allowed_file(file.filename):
+                    filename = secure_filename(file.filename)
+                    file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                    return redirect(url_for('download_file', name=filename))
+            return render_template("upload.html")
+        else:
+            return redirect(url_for("verify"))
+    else:
+        flash("You are not logged in!")
+        return redirect("/login")
     
 @app.route("/index.html")
 def goto_index():
@@ -517,53 +545,229 @@ def verify():
                 return render_template("verify.html")
     return redirect(url_for("login"))
 
-from flask import send_file
+from flask import Flask, render_template, request, redirect, url_for, send_file
+import csv
 from io import StringIO, BytesIO
 file_contents = []
+user_files = {}  # Dictionary to store user metadata and their corresponding file names
+def create_chicago_citation(metadata):
+    """
+    Create a Chicago-style citation from metadata.
+    
+    Args:
+        metadata (dict): A dictionary containing citation metadata.
+            - author_name (str): The name of the author.
+            - article_title (str): The title of the article.
+            - title (str): The title of the journal or book.
+            - inclusive_pages (str): The inclusive page numbers of the article.
+            - volume (str): The volume number of the journal.
+            - issue (str): The issue number of the journal.
+            - year (str): The year of publication.
+            - month (str): The month of publication.
+    
+    Returns:
+        str: A formatted Chicago-style citation.
+    """
+    author_name = metadata.get('author_name', '')
+    article_title = metadata.get('article_title', '')
+    title = metadata.get('title', '')
+    inclusive_pages = metadata.get('inclusive_pages', '')
+    volume = metadata.get('volume', '')
+    issue = metadata.get('issue', '')
+    year = metadata.get('year', '')
+    month = metadata.get('month', '')
 
-@app.route("/import.html", methods=["POST", "GET"])
-def importdata():
+    citation = f"{author_name}. \"{article_title}.\" {title} {volume}, no. {issue} ({month} {year}): {inclusive_pages}."
+    
+    return citation
+
+def append_to_file(filename, citation, file_path):
+    filename = filename.split(".")[0]
+    to_append = "\n" + filename + "=" + citation# Add a newline character for formatting
+    try:
+        with open(file_path, 'a') as file:
+            file.write(to_append)
+        print(f"Appended to file: {file_path}")
+    except Exception as e:
+        print(f"An error occurred while appending to the file: {e}")
+
+@app.route("/shared.html", methods=["POST", "GET"])
+def importpage():
     IMPORT_FOLDER = app.config['UPLOAD_FOLDER'].replace("datafiles_csv", "datasets_shared")
+    global file_contents, user_files
     print("dbg: IMPORT_FOLDER = " + IMPORT_FOLDER)
     if request.method == 'POST':
+        author_name = request.form['author_name']
+        article_title = request.form['article_title']
+        title = request.form['title']
+        inclusive_pages = request.form['inclusive_pages']
+        volume = request.form['volume']
+        issue = request.form['issue']
+        year = request.form['year']
+        month = request.form['month']
+        
         if 'file' in request.files:
             files = request.files.getlist('file')
             for file in files:
                 if file.filename == '':
                     continue
+                ###
                 filename = secure_filename(file.filename)
                 file.save(os.path.join(IMPORT_FOLDER, filename))
+                ###
                 # Read the content of the file and store it
+                stream = StringIO(file.stream.read().decode("UTF8"), newline=None)
+                csv_input = csv.reader(stream)
+                file_data = list(csv_input)
+                # to change; have individuals put manual citations.
+                citation = create_chicago_citation({
+                        'author_name': author_name,
+                        'article_title': article_title,
+                        'title': title,
+                        'inclusive_pages': inclusive_pages,
+                        'volume': volume,
+                        'issue': issue,
+                        'year': year,
+                        'month': month
+                    })
+                to_append = filename + "=" + citation
+                print("dbg.to_append = " + to_append)
+
+                append_to_file(filename, citation, config["BASE"] + "/citations.txt")
 
     files = os.listdir(IMPORT_FOLDER)
     file_contents = [{'filename': f} for f in files]
 
-    return render_template("import.html", file_contents=file_contents)
+    return render_template("shared.html", file_contents=file_contents)
+
+@app.route("/preview", methods=["POST", "GET"])
+def preview():
+    if request.method == "POST":
+        filename = request.form['filename']
+    # Construct the full file path
+    file_path = config["BASE"] + "/datasets_shared/" + filename
+    print("dbg.file_path.preview = " + file_path)
+    # Check if file exists
+    if not os.path.exists(file_path):
+        return "File not found", 404
+    
+    # Read the CSV file
+    try:
+        df = pd.read_csv(file_path, nrows=100)
+    except Exception as e:
+        return f"An error occurred while reading the CSV file: {e}", 500
+    
+    # Convert DataFrame to HTML
+    html_table = df.to_html(classes='table table-striped', index=False)
+    
+    # Render the HTML table
+    html = f"""
+    <!doctype html>
+    <html lang="en">
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+        <title>CSV Preview</title>
+      </head>
+      <body>
+        <div class="container">
+          <h1 class="mt-5">Preview of {filename} (first 100 rows)</h1>
+          <div class="table-responsive">
+            {html_table}
+          </div>
+        </div>
+      </body>
+    </html>
+    """
+    
+    return html
+
+def copy_file_to_folder(file_path, destination_folder):
+    """
+    Copy a file to the specified folder.
+    
+    Args:
+        file_path (str): The full path to the file to be copied.
+        destination_folder (str): The folder where the file should be copied.
+    
+    Returns:
+        str: The path to the copied file, or an error message.
+    """
+    try:
+        # Ensure the destination folder exists
+        if not os.path.exists(destination_folder):
+            os.makedirs(destination_folder)
+        
+        # Get the filename from the file path
+        filename = os.path.basename(file_path)
+        
+        # Construct the full destination path
+        destination_path = os.path.join(destination_folder, filename)
+        
+        # Copy the file
+        shutil.copy(file_path, destination_path)
+        
+        return f"File copied to {destination_path}"
+    except Exception as e:
+        return f"An error occurred: {e}"
+
+@app.route("/import", methods=["POST"])
+def import_file():
+    print("dbg: import req sent")
+    if 'user' in session:  
+        filename = request.form['filename']
+        file_path = config["BASE"] + "/datasets_shared/" + filename
+        destination_folder = config["UPLOAD_FOLDER"] + "/" + session['user']
+        print("dbg.file_path = " + file_path)
+        print("dbg.destination_folder = " + destination_folder)
+        try:
+            # Ensure the destination folder exists
+            if not os.path.exists(destination_folder):
+                os.makedirs(destination_folder)
+            
+            copy_file_to_folder(file_path, destination_folder)
+            flash(f"Successfully imported {filename}")
+            return redirect(url_for('importpage'))
+        except Exception as e:
+            return f"An error occurred: {e}"
+        
+    else:
+        flash("You must be logged in to import data.")
+        return redirect(url_for('login'))
+    
 
 @app.route("/delete", methods=["POST"])
 def delete_file():
-    global file_contents
+    global file_contents, user_files
     filename_to_delete = request.form['filename']
-    # Remove the file from file_contents
-    file_contents = [file_data for file_data in file_contents if file_data['filename'] != filename_to_delete]
-    return redirect(url_for('importdata'))
+    directory = config["BASE"] + "/datasets_shared"
+    
+    # Construct the full file path
+    file_path = os.path.join(directory, filename_to_delete)
+    
+    try:
+        # Check if file exists
+        if os.path.exists(file_path):
+            os.remove(file_path)
+            flash(f"File '{filename_to_delete}' deleted successfully")
+            return redirect(url_for('importpage'))
+        else:
+            return f"File '{filename_to_delete}' not found", 404
+    except Exception as e:
+        return str(e), 500
 
 @app.route("/download", methods=["POST"])
 def download_file():
     filename_to_download = request.form['filename']
-    for file_data in file_contents:
-        if file_data['filename'] == filename_to_download:
-            # Create a CSV in memory
-            output = StringIO()
-            writer = csv.writer(output)
-            writer.writerows(file_data['content'])
-            output.seek(0)
-
-            return send_file(BytesIO(output.getvalue().encode()), 
-                mimetype='text/csv', 
-                as_attachment=True, 
-                download_name=filename_to_download)
-    return redirect(url_for('importdata'))
+    print("dbg.filename = " + filename_to_download)
+    # Define the directory where the files are located
+    directory = config["BASE"] + "/datasets_shared"
+    try:
+        return send_from_directory(directory, filename_to_download, as_attachment=True)
+    except FileNotFoundError:
+        return "File not found", 404
+    return redirect(url_for('importpage'))
 
 @app.route("/user", methods=["POST", "GET"])
 def user():
