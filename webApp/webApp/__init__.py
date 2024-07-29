@@ -113,6 +113,10 @@ d_files = []
 all_d_files = []
 all_m_files = []
 
+m_files_shared = []
+d_files_shared = []
+all_d_files_shared = []
+all_m_files_shared = []
 # local path []
 sys.path.append(python_files_dir)
 import variables
@@ -423,6 +427,38 @@ def uploadFunction():
     b_files = []
     return redirect('/upload.html')
 
+@app.route('/verifyFunctionShared/', methods=['POST', 'GET'])  
+def verifyFunctionShared():
+    global files_shared
+    global m_files_shared, d_files_shared, g_files_shared, b_files_shared
+    global all_m_files_shared, all_d_files_shared
+    verified = False
+    # Get the list of files from webpage
+    files_shared = request.files.getlist("file")
+    print(files_shared)
+    os.chdir(app.config['UPLOAD_FOLDER'].replace("datafiles_csv", "datasets_shared"))
+    # Iterate for each file in the files List, and Save them
+    if files_shared[0].filename != "":
+        for file in files_shared:
+           file.save(file.filename)
+        m_files_shared, d_files_shared, g_files_shared, b_files_shared = upload.verify_files(files_shared)
+        if(len(b_files_shared) == 0):
+            verified = True
+        for f in g_files_shared:
+            os.remove(f)
+        for f in b_files_shared:
+            os.remove(f)
+    if(len(files_shared) == 0):
+        verified = False
+    response = {
+        "message": "data processing successful",
+        "status": 200,
+        "good_files": g_files_shared,
+        "bad_files": b_files_shared,
+        "verification": verified
+    }
+    
+    return response
 @app.route("/login", methods=["POST", "GET"])
 def login():
     if request.method == "POST":
@@ -591,10 +627,17 @@ def append_to_file(filename, citation, file_path):
     except Exception as e:
         print(f"An error occurred while appending to the file: {e}")
 
+def remove_items(test_list, item):
+ 
+    # using list comprehension to perform the task
+    res = [i for i in test_list if i != item]
+    return res
+
 @app.route("/shared.html", methods=["POST", "GET"])
 def importpage():
     IMPORT_FOLDER = app.config['UPLOAD_FOLDER'].replace("datafiles_csv", "datasets_shared")
     global file_contents, user_files
+    global all_m_files_shared, all_d_files_shared, m_files_shared, d_files_shared
     print("dbg: IMPORT_FOLDER = " + IMPORT_FOLDER)
     if request.method == 'POST':
         author_name = request.form['author_name']
@@ -605,11 +648,18 @@ def importpage():
         issue = request.form['issue']
         year = request.form['year']
         month = request.form['month']
-        
+        for m in m_files_shared:
+            all_m_files_shared.append(m)
+        for d in d_files_shared:
+            all_d_files_shared.append(d)
         if 'file' in request.files:
             files = request.files.getlist('file')
             for file in files:
                 if file.filename == '':
+                    continue
+                if file.filename == 'test_dyadic.csv':
+                    continue
+                if file.filename == 'test_monadic.csv':
                     continue
                 ###
                 filename = secure_filename(file.filename)
@@ -635,10 +685,16 @@ def importpage():
 
                 append_to_file(filename, citation, config["BASE"] + "/citations.txt")
 
-    files = os.listdir(IMPORT_FOLDER)
+    m_files_shared = []
+    d_files_shared = []
+    g_files_shared = []
+    b_files_shared = [] 
+    files_wtest = os.listdir(IMPORT_FOLDER)
+    files_wtm = remove_items(files_wtest, "test_monadic.csv")
+    files = remove_items(files_wtm, "test_dyadic.csv")
     file_contents = [{'filename': f} for f in files]
-
-    return render_template("shared.html", file_contents=file_contents)
+    
+    return render_template("/shared.html", file_contents=file_contents)
 
 @app.route("/preview", methods=["POST", "GET"])
 def preview():

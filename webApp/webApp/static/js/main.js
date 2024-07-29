@@ -2104,6 +2104,21 @@ document.addEventListener("DOMContentLoaded", function(event) {
 	}
 });
 
+function triggerValidationShared(el) {
+	document.getElementById("uploadButtonShared").disabled = true;
+	var regex = new RegExp("(.*?)\.(csv)$");
+	if (!(regex.test(el.value.toLowerCase()))) {
+    	el.value = '';
+    	alert('Please only input csv files.');
+  	}
+}
+document.addEventListener("DOMContentLoaded", function(event) {
+	if (window.location.href.indexOf("shared.html") > -1) {
+		document.getElementById("uploadButtonShared").disabled = true;
+		
+	}
+});
+
 string_2 = "";
 
 document.addEventListener("DOMContentLoaded", function(event) {
@@ -2112,9 +2127,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
 			document.getElementById("processing_upload").style.display = "inline-block";
 			document.getElementById("verifyFile").disabled = true;
 			var form_data = new FormData($('#uploadForm')[0]);
-			for (var [key, value] of form_data.entries()) { 
-				console.log(key, value);
-			}
+			
 			$.ajax({
 				type: 'POST',
 				url: '/verifyFunction',
@@ -2126,7 +2139,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
 					response = Object.entries(data);
 					good = response[1][1];
 					bad = response[0][1];
-					string_1 = "These datasets were passed through: \n";
+					string_1 = "These datasets are allowed to be uploaded: \n";
 					string_2 = "";
 					for (let g = 0; g < good.length-1; g++){
 						string_2 += "    " + good[g] + '\n';
@@ -2135,7 +2148,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
 					if (good.length == 0){
 						string_2 = "    none";
 					}
-					string_3 = "These datasets were not passed through because they did not have the necessary column names: \n";
+					string_3 = "These datasets are not allowed to be uploaded because they did not have the necessary column names: \n";
 					string_4 = "";
 					for (let b = 0; b < bad.length-1; b++){
 						string_4 += "    " + bad[b] + '\n';
@@ -2185,4 +2198,87 @@ document.addEventListener("DOMContentLoaded", function(event) {
 		});
 	});
 });
+string_2_shared = "";
+document.addEventListener("DOMContentLoaded", function(event) {
+	$(function() {
+		$('#verifyFileShared').click(function() {
+			document.getElementById("processing_uploadShared").style.display = "inline-block";
+			document.getElementById("verifyFileShared").disabled = true;
+			var form_data = new FormData($('#file-upload-form')[0]);
+			for (var [key, value] of form_data.entries()) { 
+				console.log(key, value);
+			}
+			$.ajax({
+				type: 'POST',
+				url: '/verifyFunctionShared',
+				data: form_data,
+				contentType: false,
+				cache: false,
+				processData: false,
+				success: function(data) {
+					response = Object.entries(data);
+					good = response[1][1];
+					bad = response[0][1];
+					string_1 = "These datasets are allowed to be uploaded: \n";
+					string_2_shared = "";
+					for (let g = 0; g < good.length-1; g++){
+						string_2_shared += "    " + good[g] + '\n';
+					}
+					string_2_shared += "    " + good[good.length-1];
+					if (good.length == 0){
+						string_2_shared = "    none";
+					}
+					string_3 = "These datasets are not allowed to be uploaded because they did not have the necessary column names: \n";
+					string_4 = "";
+					for (let b = 0; b < bad.length-1; b++){
+						string_4 += "    " + bad[b] + '\n';
+					}
+					string_4 += "    " + bad[bad.length-1];
+					if (bad.length == 0){
+						string_4 = "    none";
+					}
+					string_f = string_1 + string_2_shared + '\n' + string_3 + string_4;
+					alert(string_f)
+					if((bad.length == 0) && (good.length > 0) ){
+						document.getElementById("uploadButtonShared").disabled = false;
+					}
+					document.getElementById("verifyFileShared").disabled = false;
+					document.getElementById("processing_uploadShared").style.display = "none";
+				},
+			});
+		});
+	});
+});
 
+document.addEventListener("DOMContentLoaded", function(event) {
+	$(function() {
+		$('#uploadButtonShared').click(function() {
+			document.getElementById("processing_uploadShared").style.display = "inline-block";
+			document.getElementById("verifyFileShared").disabled = true;
+			document.getElementById("uploadButtonShared").disabled = true;
+			var form_data = new FormData($('#file-upload-form')[0]);
+			for (var [key, value] of form_data.entries()) { 
+				console.log(key, value);
+			}
+			$.ajax({
+				type: 'POST',
+				url: '/shared.html',
+				data: form_data,
+				contentType: false,
+				cache: false,
+				processData: false,
+				success: function() {
+					string_f = "Files successfully uploaded: \n" + string_2_shared;
+					alert(string_f);
+					document.getElementById('file_input_shared').value= null;
+					document.getElementById('file_input_shared').value= "";
+					document.getElementById('drop-area').value= "";
+
+					document.getElementById('file-list').innerHTML = "";
+					document.getElementById("verifyFileShared").disabled = false;
+					document.getElementById("processing_uploadShared").style.display = "none";
+				}
+			})
+		});
+	});
+});
