@@ -9,4 +9,26 @@
 	<input type="submit" value="Save"/>
 </form>
 <br>
+
+<h2>Uploaded/Imported files:</h2>
+<br>
+
+{% for file_data in file_contents %}
+	<div>
+		<h4>{{ file_data.filename }}:</h4>
+		<form action="/uploaded_delete" method="post" style="display:inline;">
+			<input type="hidden" name="filename" value="{{ file_data.filename }}">
+			<button type="submit">Delete</button>
+		</form>
+		<form action="/uploaded_download" method="post" style="display:inline;">
+			<input type="hidden" name="filename" value="{{ file_data.filename }}">
+			<button type="submit">Download</button>
+		</form>
+		<form action="/uploaded_preview" method="post" style="display:inline;">
+			<input type="hidden" name="filename" value="{{ file_data.filename }}">
+			<button type="submit">Preview</button>
+		</form>
+	</div>
+	<br>
+{% endfor %}
 {% endblock %}

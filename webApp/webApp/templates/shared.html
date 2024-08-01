@@ -4,12 +4,12 @@
 {% block content %}
 {% for file_data in file_contents %}
     <div>
-        <h3>{{ file_data.filename }}:</h3>
-        <form action="/delete" method="post" style="display:inline;">
+        <h4>{{ file_data.filename }}:</h4>
+        <form action="/shared_delete" method="post" style="display:inline;">
             <input type="hidden" name="filename" value="{{ file_data.filename }}">
             <button type="submit">Delete</button>
         </form>
-        <form action="/download" method="post" style="display:inline;">
+        <form action="/shared_download" method="post" style="display:inline;">
             <input type="hidden" name="filename" value="{{ file_data.filename }}">
             <button type="submit">Download</button>
         </form>
@@ -17,20 +17,12 @@
             <input type="hidden" name="filename" value="{{ file_data.filename }}">
             <button type="submit">Import</button>
         </form>
-        <form action="/preview" method="post" style="display:inline;">
+        <form action="/shared_preview" method="post" style="display:inline;">
             <input type="hidden" name="filename" value="{{ file_data.filename }}">
             <button type="submit">Preview</button>
         </form>
-        <table border="1">
-            {% for row in file_data.content %}
-                <tr>
-                    {% for cell in row %}
-                        <td>{{ cell }}</td>
-                    {% endfor %}
-                </tr>
-            {% endfor %}
-        </table>
     </div>
+    <br>
 {% endfor %}
 
 <form id="file-upload-form" action="/shared.html" method="post" enctype="multipart/form-data">
@@ -41,38 +33,10 @@
     <ul id="file-list"></ul>
     <div id="metadata-container" style="display: none;">
         <div>
-            <label for="author_name">Article or Chapter Author(s):</label>
-            <input type="text" id="author_name" name="author_name" required>
+            <label for="citation">Manual citation (Chicago):</label>
+            <br>
+            <textarea id="citation" name="citation" rows="4" cols="50" required></textarea>
         </div>
-        <div>
-            <label for="article_title">Article or Chapter Title:</label>
-            <input type="text" id="article_title" name="article_title" required>
-        </div>
-        <div>
-            <label for="title">Title (Journal, Book, etc.):</label>
-            <input type="text" id="title" name="title" required>
-        </div>
-        <div>
-            <label for="inclusive_pages">Inclusive Pages:</label>
-            <input type="text" id="inclusive_pages" name="inclusive_pages" required>
-        </div>
-        <div>
-            <label for="volume">Volume (not required):</label>
-            <input type="text" id="volume" name="volume">
-        </div>
-        <div>
-            <label for="issue">Issue Number or Designation (not required):</label>
-            <input type="text" id="issue" name="issue">
-        </div>
-        <div>
-            <label for="year">Year:</label>
-            <input type="text" id="year" name="year" required>
-        </div>
-        <div>
-            <label for="month">Month (not required):</label>
-            <input type="text" id="month" name="month">
-        </div>
-        <p id="citation-message" style="color: red;">This information is required for citation purposes.</p>
     </div>
     <button type="submit" style="display: none;" id="upload-button">Upload</button>
 </form>

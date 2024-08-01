@@ -294,7 +294,7 @@ def goto_upload():
     else:
         flash("You are not logged in!")
         return redirect("/login")
-# needs verification... @alice
+
 def upload_file():
     if "user" in session:
         if session["verified"] == True:
@@ -313,7 +313,7 @@ def upload_file():
                 if file and allowed_file(file.filename):
                     filename = secure_filename(file.filename)
                     file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                    return redirect(url_for('download_file', name=filename))
+                    return redirect(url_for('shared_download_file', name=filename))
             return render_template("upload.html")
         else:
             return redirect(url_for("verify"))
@@ -409,7 +409,10 @@ def uploadFunction():
     for d in d_files:
         all_d_files.append(d)
     files = request.files.getlist("file")
+    citation = request.form['citation']
+    print("dbg.citation: " + citation)
     username = session["user"]
+    
     directory_to_check = config["UPLOAD_FOLDER"] + "/" + username
     if not os.path.isdir(directory_to_check):
         os.makedirs(directory_to_check)
@@ -597,14 +600,7 @@ def importpage():
     global file_contents, user_files
     print("dbg: IMPORT_FOLDER = " + IMPORT_FOLDER)
     if request.method == 'POST':
-        author_name = request.form['author_name']
-        article_title = request.form['article_title']
-        title = request.form['title']
-        inclusive_pages = request.form['inclusive_pages']
-        volume = request.form['volume']
-        issue = request.form['issue']
-        year = request.form['year']
-        month = request.form['month']
+        citation= request.form['citation']
         
         if 'file' in request.files:
             files = request.files.getlist('file')
@@ -620,16 +616,6 @@ def importpage():
                 csv_input = csv.reader(stream)
                 file_data = list(csv_input)
                 # to change; have individuals put manual citations.
-                citation = create_chicago_citation({
-                        'author_name': author_name,
-                        'article_title': article_title,
-                        'title': title,
-                        'inclusive_pages': inclusive_pages,
-                        'volume': volume,
-                        'issue': issue,
-                        'year': year,
-                        'month': month
-                    })
                 to_append = filename + "=" + citation
                 print("dbg.to_append = " + to_append)
 
@@ -640,12 +626,7 @@ def importpage():
 
     return render_template("shared.html", file_contents=file_contents)
 
-@app.route("/preview", methods=["POST", "GET"])
-def preview():
-    if request.method == "POST":
-        filename = request.form['filename']
-    # Construct the full file path
-    file_path = config["BASE"] + "/datasets_shared/" + filename
+def construct_preview(file_path):
     print("dbg.file_path.preview = " + file_path)
     # Check if file exists
     if not os.path.exists(file_path):
@@ -659,8 +640,7 @@ def preview():
     
     # Convert DataFrame to HTML
     html_table = df.to_html(classes='table table-striped', index=False)
-    
-    # Render the HTML table
+
     html = f"""
     <!doctype html>
     <html lang="en">
@@ -672,7 +652,7 @@ def preview():
       </head>
       <body>
         <div class="container">
-          <h1 class="mt-5">Preview of {filename} (first 100 rows)</h1>
+          <h1 class="mt-5">Preview of {file_path.split("/")[-1]} (first 100 rows)</h1>
           <div class="table-responsive">
             {html_table}
           </div>
@@ -680,8 +660,27 @@ def preview():
       </body>
     </html>
     """
-    
+
     return html
+
+@app.route("/uploaded_preview", methods=["POST", "GET"])
+def uploaded_preview():
+    if request.method == "POST":
+        filename = request.form['filename']
+    # Construct the full file path
+    file_path = config["UPLOAD_FOLDER"] + "/" + session["user"] + "/" + filename
+    
+    return construct_preview(file_path)
+
+@app.route("/shared_preview", methods=["POST", "GET"])
+def shared_preview():
+    if request.method == "POST":
+        filename = request.form['filename']
+    # Construct the full file path
+    file_path = config["BASE"] + "/datasets_shared/" + filename
+    
+    return construct_preview(file_path)
+
 
 def copy_file_to_folder(file_path, destination_folder):
     """
@@ -737,8 +736,8 @@ def import_file():
         return redirect(url_for('login'))
     
 
-@app.route("/delete", methods=["POST"])
-def delete_file():
+@app.route("/shared_delete", methods=["POST"])
+def shared_delete_file():
     global file_contents, user_files
     filename_to_delete = request.form['filename']
     directory = config["BASE"] + "/datasets_shared"
@@ -757,8 +756,8 @@ def delete_file():
     except Exception as e:
         return str(e), 500
 
-@app.route("/download", methods=["POST"])
-def download_file():
+@app.route("/shared_download", methods=["POST"])
+def shared_download_file():
     filename_to_download = request.form['filename']
     print("dbg.filename = " + filename_to_download)
     # Define the directory where the files are located
@@ -791,7 +790,13 @@ def user():
                 email = session["email"]
         username = found_user.name
         flash("Logged in as " + username)
-        return render_template("user.html", email=email)
+
+        filesfolder = config["UPLOAD_FOLDER"] + "/" + username
+        print("dbg.filesfolder: " + filesfolder)
+        files = os.listdir(filesfolder)
+        file_contents = [{'filename': f} for f in files]
+
+        return render_template("user.html", email=email, file_contents=file_contents)
     else:
         return redirect(url_for("login"))
 

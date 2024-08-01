@@ -7,3 +7,7 @@ COW_MIDs_2022_Non_Directed_Dyadic=Author, F. (2022). COW MIDs Non-Directed Dyadi
 COW_National_Military_Capabilities=Author, G. (2022). COW National Military Capabilities Dataset. Journal of Strategic Studies, 10(4), 201-223.
 COW_Trade_Dyadic=Author, H. (2022). COW Trade Dyadic Dataset. International Trade Journal, 14(1), 45-67.
 COW_World_Religions=Author, I. (2022). COW World Religions Dataset. Journal of Religion and Society, 16(2), 89-112.
+### SHARED ###
+sample_csv=test
+sample_csv=test
+sample_csv=test2
