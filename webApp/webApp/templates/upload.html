@@ -21,13 +21,30 @@
 		<style>
 			.centered-layout {
 				margin: 0 auto;
-				max-width: 1200px; /* Adjust this value based on your preference */
+				max-width: 1200px;
 			}
 			.header-center {
 				text-align: center;
 				margin-top: 20px;
 			}
 		</style>
+		<style>
+			.drop-area {
+				border: 2px dashed #ccc;
+				border-radius: 10px;
+				padding: 20px;
+				text-align: center;
+				cursor: pointer;
+			}
+			.drop-area.dragging {
+				background-color: #f0f0f0;
+				border-color: #00bfff;
+			}
+			#metadata-container > div {
+				margin-bottom: 10px;
+			}
+		</style>
+		
 	</head>
 	<body>
 		<script>
@@ -55,54 +72,56 @@
 				<br>
 				<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
 					<div class="container-fluid">
-						<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor04" aria-controls="navbarColor04" aria-expanded="false" aria-label="Toggle navigation">
-							<span class="navbar-toggler-icon"></span>
-						</button>
-				
-						<div class="collapse navbar-collapse" id="navbarColor04">
-							<ul class="navbar-nav me-auto">
+						<ul class="navbar-nav me-auto">
+							<li class="nav-item">
+								<a class="nav-link active" href="index.html">Home</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link" href="dataUnlimVar.html">Data</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link" href="download.html">Downloads</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link" href="upload.html">Upload</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link" href="shared.html">Shared</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link" href="guides.html">Guides and FAQ</a>
+							</li>
+						</ul>
+							
+						<ul class="navbar-nav ms-auto">
+							{% if 'user' in session %}
 								<li class="nav-item">
-									<a class="nav-link" href="index.html">Home</a>
+									<a class="nav-link" href="/user">{{ session['user']}}</a>
 								</li>
-								<li class="nav-item">
-									<a class="nav-link" href="dataUnlimVar.html">Data</a>
-								</li>
-								<li class="nav-item">
-									<a class="nav-link" href="download.html">Downloads</a>
-								</li>
-								<li class="nav-item">
-									<a class="nav-link active" href="upload.html">Upload</a>
-								</li>
-								<li class="nav-item">
-									<a class="nav-link" href="shared.html">Shared</a>
-								</li>
-								<li class="nav-item">
-									<a class="nav-link" href="guides.html">Guides and FAQ</a>
-								</li>
-							</ul>
-							<div class="d-flex justify-content-end">
-								<ul class="navbar-nav">
-									<li class="nav-item">
-										{% if 'user' in session %}
-											<a class="nav-link" href="{{ url_for('logout') }}">Logged in as {{ session['user'] }} (Logout)</a>
-										{% else %}
-											<a class="nav-link" href="{{ url_for('login') }}">Login</a>
-										{% endif %}
-									</li>
-								</ul>
-							</div>
-						</div>
+							{% endif %}
+							<li class="nav-item">
+								{% if 'user' in session %}
+									<a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+								{% else %}
+									<a class="nav-link" href="{{ url_for('login') }}">Login</a>
+								{% endif %}
+							</li>
+						</ul>
 					</div>
 				</nav>
 				
 			</header>
-			<div id = "upload" style = "padding-top:20px">
-				<form action = "" id="uploadForm" method="post" enctype="multipart/form-data">
-					<input type="file" id = "file_input" name="file" oninput="triggerValidation(this)" accept=".csv" multiple />  <br><br>
+			<div id="upload" style="padding-top:20px">
+				<form action="/upload" id="uploadForm" method="post" enctype="multipart/form-data">
+					<input type="file" id="file_input" name="file" oninput="triggerValidation(this)" accept=".csv" multiple />  <br><br>
+					<div>
+						<label for="citation">Manual citation (Chicago):</label>
+						<br>
+						<textarea id="citation" name="citation" rows="4" cols="50" required></textarea>
+					</div>
 					<button id="verifyFile" type="button">Verify</button>
-					<button id="uploadButton" type="button">Upload</button>
-					<!-- <input type = "submit" id="uploadButton" type="button" value = "Upload" onclick = "uploadFileSuccess()"> -->
-					<p id = "processing_upload" style="padding:0px; margin: 0px;display:none; font-family:Arial, Helvetica, sans-serif;font-size:13.33333px;">processing...</p>
+					<button id="uploadButton" type="submit">Upload</button>
+					<p id="processing_upload" style="padding:0px; margin: 0px;display:none; font-family:Arial, Helvetica, sans-serif;font-size:13.33333px;">processing...</p>
 				</form>
 			</div>
 			<footer id="footer" class="text-center py-4">
