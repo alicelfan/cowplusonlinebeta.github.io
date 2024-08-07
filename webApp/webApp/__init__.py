@@ -112,11 +112,11 @@ m_files = []
 d_files = []
 all_d_files = []
 all_m_files = []
-
 m_files_shared = []
 d_files_shared = []
 all_d_files_shared = []
 all_m_files_shared = []
+
 # local path []
 sys.path.append(python_files_dir)
 import variables
@@ -460,8 +460,9 @@ def verifyFunctionShared():
         "bad_files": b_files_shared,
         "verification": verified
     }
-    
+
     return response
+
 @app.route("/login", methods=["POST", "GET"])
 def login():
     if request.method == "POST":
@@ -502,6 +503,12 @@ def login():
             flash("Already logged in!")
             return redirect(url_for("user"))
         return render_template("login.html")
+
+def remove_items(test_list, item):
+
+    # using list comprehension to perform the task
+    res = [i for i in test_list if i != item]
+    return res
 
 @app.route("/signup.html", methods=["POST", "GET"])
 def signup():
@@ -630,12 +637,6 @@ def append_to_file(filename, citation, file_path):
     except Exception as e:
         print(f"An error occurred while appending to the file: {e}")
 
-def remove_items(test_list, item):
- 
-    # using list comprehension to perform the task
-    res = [i for i in test_list if i != item]
-    return res
-
 @app.route("/shared.html", methods=["POST", "GET"])
 def importpage():
     IMPORT_FOLDER = app.config['UPLOAD_FOLDER'].replace("datafiles_csv", "datasets_shared")
@@ -643,23 +644,11 @@ def importpage():
     global all_m_files_shared, all_d_files_shared, m_files_shared, d_files_shared
     print("dbg: IMPORT_FOLDER = " + IMPORT_FOLDER)
     if request.method == 'POST':
-<<<<<<< HEAD
-        author_name = request.form['author_name']
-        article_title = request.form['article_title']
-        title = request.form['title']
-        inclusive_pages = request.form['inclusive_pages']
-        volume = request.form['volume']
-        issue = request.form['issue']
-        year = request.form['year']
-        month = request.form['month']
+        citation= request.form['citation']
         for m in m_files_shared:
             all_m_files_shared.append(m)
         for d in d_files_shared:
             all_d_files_shared.append(d)
-=======
-        citation= request.form['citation']
-        
->>>>>>> fe54efdaaf066c202b747797d7486607664fcdc3
         if 'file' in request.files:
             files = request.files.getlist('file')
             for file in files:
@@ -691,8 +680,8 @@ def importpage():
     files_wtm = remove_items(files_wtest, "test_monadic.csv")
     files = remove_items(files_wtm, "test_dyadic.csv")
     file_contents = [{'filename': f} for f in files]
-    
-    return render_template("/shared.html", file_contents=file_contents)
+
+    return render_template("shared.html", file_contents=file_contents)
 
 def construct_preview(file_path):
     print("dbg.file_path.preview = " + file_path)
