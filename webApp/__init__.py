@@ -31,7 +31,6 @@ import threading
 import math
 from threading import Lock
 import queue
-sys.path.append('/var/www/webApp/webApp')
 #sys.path.append('C:\cowplusonlinebeta.github.io\webApp\webApp')
 import openconfig
 from flask import request
@@ -1389,12 +1388,12 @@ def create_df():
     else:
         dataframe = data_merger.createNewDataList(dc, vc, "test_profile") # datasetChooser, variableChooser
     dataframe = dataframe.drop(["eventID"], axis = 1)
-    dataframe['ccode'] = dataframe['ccode'].astype(str)
     sample = dataframe.loc[:999]
     stateabb_vals = []
     stateabb1_vals = []
     stateabb2_vals = []
     if "stateabb" in dataframe.columns:
+        dataframe['ccode'] = dataframe['ccode'].astype(str)
         stateabb_values = dataframe['stateabb'].unique()
         stateabb_vals = sorted(stateabb_values)
     if "stateabb1" in dataframe.columns:
@@ -1634,4 +1633,4 @@ def enable_refresh_page():
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, ssl_context=None)

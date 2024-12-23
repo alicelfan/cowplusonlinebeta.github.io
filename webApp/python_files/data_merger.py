@@ -175,14 +175,14 @@ def createNewDataList(files_chosen_raw, variables_chosen, username):
         df.insert(1, "ccode1", splitEvent[1])
         df.insert(1, "stateabb1", splitEvent[0])
         df.year = df.year.astype(int)
-        df['ccode1'] = pd.to_numeric(df['ccode'], errors='coerce')
+        df['ccode1'] = pd.to_numeric(df['ccode1'], errors='coerce')
         if df['ccode1'].isna().any():
             print('There are empty ccode values! Please correct them. The empty values have been replaced with 0.', 'error')
-        df['ccode1'] = df['ccode'].fillna(0)
-        df['ccode2'] = pd.to_numeric(df['ccode'], errors='coerce')
+        df['ccode1'] = df['ccode1'].fillna(0)
+        df['ccode2'] = pd.to_numeric(df['ccode2'], errors='coerce')
         if df['ccode2'].isna().any():
             print('There are empty ccode2 values! Please correct them. The empty values have been replaced with 0.', 'error')
-        df['ccode2'] = df['ccode'].fillna(0)
+        df['ccode2'] = df['ccode2'].fillna(0)
         df.ccode2 = df.ccode2.astype(int)
         df.ccode1 = df.ccode1.astype(int)
         df = df.sort_values(by=["ccode1", "ccode2", "year"])

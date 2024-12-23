@@ -355,7 +355,7 @@ async function retrieveJSON() {
 
     try {
 		showLoadingMessage();
-        const response = await fetch('createDf'); // issues a GET request by default
+        const response = await fetch('http://127.0.0.1:5000/createDf/'); // issues a GET request by default
         const data = await response.json(); // data becomes the response from create_df(), which is { 'message': 'data processing successful', 'status': 200, 'new_df': new_df }
         // access the new_df data from the response
 		const newdf = data.new_df; // this js constant is set to the new_df output from the response, which is a JSON array
@@ -374,7 +374,7 @@ async function retrieveJSONSecondStep() {
 
     try {
 		showLoadingMessage();
-        const response = await fetch('createDfSS'); // issues a GET request by default
+        const response = await fetch('http://127.0.0.1:5000/createDfSS/'); // issues a GET request by default
         const data = await response.json(); // data becomes the response from create_df(), which is { 'message': 'data processing successful', 'status': 200, 'new_df': new_df }
         // access the new_df data from the response
 		const new_df = data.new_df; // this js constant is set to the new_df output from the response, which is a JSON array
@@ -416,7 +416,7 @@ async function retrieveBackButtonTwo() {
     var myData = [];
 
     try {
-        const response = await fetch('backbutton2'); // issues a GET request by default
+        const response = await fetch('http://127.0.0.1:5000/backbutton2/'); // issues a GET request by default
         const data = await response.json(); // data becomes the response from create_df(), which is { 'message': 'data processing successful', 'status': 200, 'new_df': new_df }
         // access the new_df data from the response
 		const new_df = data.new_df; // this js constant is set to the new_df output from the response, which is a JSON array
@@ -1262,7 +1262,7 @@ async function AddColumns() {
 async function filterGrid() {
 	let filterItems = [filterYearMin, filterYearMax, filterState1, filterState2];
 	try {
-		const response = await fetch("/filterData", {
+		const response = await fetch("http://127.0.0.1:5000//filterData", {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify({ array: filterItems }),
@@ -1280,7 +1280,7 @@ async function retrieveCSVThirdStep() {
 	await hideDownloadMessage();
 	await filterGrid();
 	try {
-        const response = await fetch('downloadDf'); // issues a GET request by default
+        const response = await fetch('http://127.0.0.1:5000/downloadDf'); // issues a GET request by default
         const data = await response.json(); // data becomes the response from create_df(), which is { 'message': 'data processing successful', 'status': 200, 'new_df': new_df }
         // access the new_df data from the response
 		const download_csv = data.csv; // this js constant is set to the new_df output from the response, which is a JSON array
@@ -1307,7 +1307,7 @@ async function exportCitations(filename) {
 
 async function retrieveFirstStepVars() {
 	try {
-        const response = await fetch('firstStepVarJSON'); // issues a GET request by default
+        const response = await fetch('http://127.0.0.1:5000/firstStepVarJSON/'); // issues a GET request by default
         const json_response = await response.json(); // data becomes the response from create_df(), which is { 'message': 'data processing successful', 'status': 200, 'new_df': new_df }
         // access the new_df data from the response
 		const var_ids_r = json_response.var_id_json; // this js constant is set to the new_df output from the response, which is a JSON array
@@ -1377,7 +1377,7 @@ async function first_step_vars() {
 
 async function retrieveSecondStepVars() {
 	try {
-        const response = await fetch('secondStepVarJSON'); // issues a GET request by default
+        const response = await fetch('http://127.0.0.1:5000/secondStepVarJSON/'); // issues a GET request by default
         const json_response = await response.json(); // data becomes the response from create_df(), which is { 'message': 'data processing successful', 'status': 200, 'new_df': new_df }
         // access the new_df data from the response
 		const var_ids_r = json_response.var_id_json; // this js constant is set to the new_df output from the response, which is a JSON array
