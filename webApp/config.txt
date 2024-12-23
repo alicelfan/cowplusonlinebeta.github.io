@@ -1,0 +1,3 @@
+BASE=/var/www/webApp/webApp
+UPLOAD_FOLDER=/var/www/webApp/webApp/datafiles_csv
+SQLALCHEMY_DATABASE_URI=sqlite:////var/www/webApp/webApp/instance/users.sqlite3

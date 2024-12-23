@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block title %}CowPlus | Shared{% endblock %}
+{% block linkdownload %}class = "active"{% endblock %}
+{% block content %}
+<body>
+<div id = "sharedGuide">
+    <h4>How to Upload Datasets for Public Use</h4>
+    <ol>
+        <li>The upload function only accepts “.csv” files. Please make sure that your datasets have the following variables. If you do not have these variables, an alert will show up and your file will not pass verification for uploading.</li>
+            <ol type="a">
+                <li>For monadic datasets: stateabb (state abbreviations), ccode (country codes), year</li>
+                <li>For dyadic datasets: stateabb1, ccode1, stateabb2, ccode2, year</li>
+                <li>For country codes and state abbreviations, please refer to the <a href=https://correlatesofwar.org/data-sets/cow-country-codes-2>Correlates of War website.</a></li>
+            </ol>
+        <li>Click the “Verify” button. It may take some time for your data to pass verification, especially if you have a lot of variables.</li>
+        <li>After your file has passed verification, simply click “Upload.” Once again, it may take some time to upload if you have large datasets (>50 MB). Both buttons will be grayed out, indicating that the upload process has begun.</li>
+        <li>To delete your datasets from the Shared page, simply click “Delete.” To download datasets to your computer, click “Download.” To import datasets to your uploaded datasets list, click “Import.” Finally, to preview datasets before downloading or importing datasets, click “Preview.”</li>
+    </ol>
+</div>
+<p><b>Note:</b> Files uploaded here will be publicly accessible and available for anyone to use and download. If you wish to upload files for personal use, please visit the <a href="/upload.html">Upload page</a>.</p>
+<hr style="border: .7px solid #2C3E50;">
+{% for file_data in file_contents %}
+    <div>
+        <h4 style="display:inline">{{ file_data.filename }}: </h4>
+        {% if session_user == file_data.filename.split("_")[0] %}
+        <form action="/shared_delete" method="post" style="display:inline;">
+            <input type="hidden" name="filename" value="{{ file_data.filename }}">
+            <button type="submit">Delete</button>
+        </form>
+        {%endif%}
+        <form action="/shared_download" method="post" style="display:inline;">
+            <input type="hidden" name="filename" value="{{ file_data.filename }}">
+            <button type="submit">Download</button>
+        </form>
+        <form action="/import" method="post" style="display:inline;">
+            <input type="hidden" name="filename" value="{{ file_data.filename }}">
+            <button type="submit">Import</button>
+        </form>
+        <form action="/shared_preview" method="post" style="display:inline;">
+            <input type="hidden" name="filename" value="{{ file_data.filename }}">
+            <button type="submit">Preview</button>
+        </form>
+    </div>
+    <br>
+{% endfor %}
+
+
+<form id="file-upload-form" action="" method="post" enctype="multipart/form-data">
+    <div class="drop-area" id="drop-area-shared">
+        <p>Drag & Drop your files here or click to select files</p>
+        <input type="file" id="file_input_shared" name="file" oninput="triggerValidationShared(this)" accept=".csv" style="display: none;">
+    </div>
+    <ul id="file-list-shared"></ul>
+    <div id="metadata-container-shared" style="display: none;">
+        <div>
+            <label for="citation">Manual citation (Chicago):</label>
+            <br>
+            <textarea id="citation" name="citation" rows="4" cols="50" required></textarea>
+        </div>
+    </div>
+    <button id="verifyFileShared" type="button">Verify</button>
+	<button id="uploadButtonShared" type="button">Upload</button>
+    <p id = "processing_uploadShared" style="padding:0px; margin: 0px;display:none; font-family:Arial, Helvetica, sans-serif;font-size:13.33333px;">processing...please wait</p>
+</form>
+</body>
+<style>
+    .drop-area {
+        border: 2px dashed #ccc;
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+        cursor: pointer;
+    }
+    .drop-area.dragging {
+        background-color: #f0f0f0;
+        border-color: #00bfff;
+    }
+    #metadata-container > div {
+        margin-bottom: 10px;
+    }
+</style>
+
+<script>
+    const dropArea = document.getElementById('drop-area-shared');
+    const fileInput = document.getElementById('file_input_shared');
+    const fileList = document.getElementById("file-list-shared");
+    const metadataContainer = document.getElementById("metadata-container-shared");
+    const uploadButtonShared = document.getElementById('uploadButtonShared');
+
+    dropArea.addEventListener('click', () => fileInput.click());
+
+    dropArea.addEventListener('dragover', (event) => {
+        event.preventDefault();
+        dropArea.classList.add('dragging');
+    });
+
+    dropArea.addEventListener('dragleave', () => {
+        dropArea.classList.remove('dragging');
+    });
+
+    dropArea.addEventListener('drop', (event) => {
+        event.preventDefault();
+        dropArea.classList.remove('dragging');
+
+        // Get the dropped files
+        const files = event.dataTransfer.files;
+        handleFiles(files);
+    });
+
+    function handleFiles(files) {
+        // Add files to the input element's files property
+        const dataTransfer = new DataTransfer();
+        for (const file of files) {
+            dataTransfer.items.add(file);
+        }
+        fileInput.files = dataTransfer.files;
+
+        // Clear previous file list
+        fileList.innerHTML = '';
+        // Display file names
+        for (const file of files) {
+            const listItem = document.createElement('li');
+            listItem.textContent = file.name;
+            fileList.appendChild(listItem);
+        }
+
+        // Show the metadata input and upload button
+        metadataContainer.style.display = 'block';
+    }
+
+    fileInput.addEventListener('change', () => {
+        handleFiles(fileInput.files);
+    });
+</script>
+{% endblock %}

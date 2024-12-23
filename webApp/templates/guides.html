@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}CowPlus Online | Home{% endblock %}
+{% block linkindex %}class = "active"{% endblock %}
+{% block content %}
+<div id = "guides">
+	<h4>How to Generate Datasets</h4>
+    <ol>
+        <li>Wait for the variable table to load. If you have uploaded many datasets, you may wait for some time, as the loading time is correlated with the number of variables.</li>
+        <li>Select the variables you want to observe, and click “Create.” Wait for the data table to generate. The process begins when the “Create” button is grayed out and may take some time depending on how many variables you have chosen and how many datasets you have chosen variables from.</li>
+        <ol type="a">
+            <li>You will not be able to select variables from both monadic and dyadic datasets at the same time. If you would like to add monadic data to dyadic data, first select variables from dyadic datasets. Then, select “Create,” and you will be asked whether or not you want to add monadic data. Select “Yes,” and you will be able to add monadic data to your dyadic dataset.
+            </li>
+        </ol>
+        <li>If your variables were from a dyadic dataset, you will be given the option to add variables from monadic datasets. This will create a dataset that has the dyadic data and monadic data for both countries in a given dyad. Similarly, generating the data table again may take some time depending on how many variables from monadic datasets you have chosen and how many monadic datasets you have chosen variables from.</li>
+        <li>You can download the dataset by clicking the “Download” button.</li>
+    </ol>
+    <hr style="border: .7px solid #2C3E50;">
+    <h4>How to Upload Datasets for Personal Use</h4>
+    <ol>
+        <li>The upload function only accepts “.csv” files. Please make sure that your datasets have the following variables. If you do not have these variables, an alert will show up and your file will not pass verification for uploading.</li>
+        <ol type="a">
+            <li>For monadic datasets: stateabb (state abbreviations), ccode (country codes), year</li>
+            <li>For dyadic datasets: stateabb1, ccode1, stateabb2, ccode2, year</li>
+            <li>For country codes and state abbreviations, please refer to the <a href=https://correlatesofwar.org/data-sets/cow-country-codes-2>Correlates of War website.</a></li>
+        </ol>
+        <li>Click the “Verify” button. It may take some time for your data to pass verification, especially if you have a lot of variables.</li>
+        <li>After your file has passed verification, simply click “Upload.” Once again, it may take some time to upload if you have large datasets (>50 MB). Both buttons will be grayed out, indicating that the upload process has begun.</li>
+        <li>When you return to the “Data” page, you may notice that the variable table takes a longer time to generate. This is because the variable table’s generation speed is dependent on the number of variables across all preloaded datasets as well as all of your uploaded datasets. To minimize the speed difference, it would be best to upload your datasets with only the variables that you would like to add to your “Data” page. You can also delete your datasets in your user page.
+        </li>
+    </ol>
+    <hr style="border: .7px solid #2C3E50;">
+    <h4>How to Upload Datasets for Public Use</h4>
+    <ol>
+        <li>The upload function only accepts “.csv” files. Please make sure that your datasets have the following variables. If you do not have these variables, an alert will show up and your file will not pass verification for uploading.</li>
+            <ol type="a">
+                <li>For monadic datasets: stateabb (state abbreviations), ccode (country codes), year</li>
+                <li>For dyadic datasets: stateabb1, ccode1, stateabb2, ccode2, year</li>
+                <li>For country codes and state abbreviations, please refer to the <a href=https://correlatesofwar.org/data-sets/cow-country-codes-2>Correlates of War website.</a></li>
+            </ol>
+        <li>Click the “Verify” button. It may take some time for your data to pass verification, especially if you have a lot of variables.</li>
+        <li>After your file has passed verification, simply click “Upload.” Once again, it may take some time to upload if you have large datasets (>50 MB). Both buttons will be grayed out, indicating that the upload process has begun.</li>
+        <li>To delete your datasets from the Shared page, simply click “Delete.” To download datasets to your computer, click “Download.” To import datasets to your uploaded datasets list, click “Import.” Finally, to preview datasets before downloading or importing datasets, click “Preview.”</li>
+    </ol>
+</div>
+{% endblock %}

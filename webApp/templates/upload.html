@@ -1,0 +1,225 @@
+<html lang="en">
+<head>
+    <title>CowPlus Online</title>
+    <meta charset="utf-8" />
+    <meta name="description" content="COW Plus Online data manager is an online platform for managing data related to international relations, primarily international conflict. If you are conducting research on war or international security, this platform will help you create a comprehensive and easily manipulable dataset for quantitative analysis.">
+    <meta name="keywords" content="COW Plus Online, Professor Poast COW Plus Online, data management software ir, correlates of war, international relations data">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+		<link rel="stylesheet" href="{{ url_for('static', filename='SlickGrid-2.4.44/slick.grid.css') }}" type="text/css"/>
+		<link rel="stylesheet" href="{{ url_for('static', filename='SlickGrid-2.4.44/css/smoothness/jquery-ui.css') }}" type="text/css"/>
+
+		<!-- <link rel="stylesheet" href="SlickGrid-2.4.44/css/smoothness/jquery-ui.css" type="text/css"/> -->
+		<link rel="canonical" href= "https://www.geeksforgeeks.org/creating-progress-bar-using-javascript/" />
+		<link rel="canonical" href= "https://www.encodedna.com/javascript/populate-json-data-to-html-table-using-javascript.htm" />
+		<link href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/4.3.1/flatly/bootstrap.min.css" rel="stylesheet">
+
+		<link rel="stylesheet" href="{{ url_for('static', filename='SlickGrid-2.4.44/examples/examples.css') }}" type="text/css"/>
+		<link rel="stylesheet" href="{{ url_for('static', filename='SlickGrid-2.4.44/css/plugins-common.css') }}" type="text/css"/>
+		<link rel="stylesheet" href="{{ url_for('static', filename='SlickGrid-2.4.44/css/plugins-gdoc-style.css') }}" type="text/css"/>
+		<link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+
+    <style>
+        .centered-layout {
+            margin: 0 auto;
+            max-width: 1200px;
+        }
+        .header-center {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .drop-area {
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+        }
+        .drop-area.dragging {
+            background-color: #f0f0f0;
+            border-color: #00bfff;
+        }
+        #file-list {
+            list-style-type: none;
+            padding: 0;
+            margin-top: 10px;
+        }
+        #metadata-container > div {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="{{ url_for('static', filename='SlickGrid-2.4.44/lib/jquery.event.drag-2.3.0.js') }}"></script>
+    <script src="{{ url_for('static', filename='SlickGrid-2.4.44/slick.core.js') }}"></script>
+    <script src="{{ url_for('static', filename='SlickGrid-2.4.44/slick.grid.js') }}"></script>
+    <script src="{{ url_for('static', filename='SlickGrid-2.4.44/slick.dataview.js') }}"></script>
+    <script src="{{ url_for('static', filename='SlickGrid-2.4.44/slick.editors.js') }}"></script>
+    <script src="{{ url_for('static', filename='SlickGrid-2.4.44/slick.formatters.js') }}"></script>
+    <script src="{{ url_for('static', filename='SlickGrid-2.4.44/plugins/slick.rowselectionmodel.js') }}"></script>
+    <script src="{{ url_for('static', filename='SlickGrid-2.4.44/underscore.js') }}"></script>
+    <script src="{{ url_for('static', filename='SlickGrid-2.4.44/plugins/slick.cellrangeselector.js') }}"></script>
+    <script src="{{ url_for('static', filename='SlickGrid-2.4.44/plugins/slick.cellselectionmodel.js') }}"></script>
+    <script src="{{ url_for('static', filename='SlickGrid-2.4.44/plugins/slick.cellrangedecorator.js') }}"></script>
+    <script src="{{ url_for('static', filename='SlickGrid-2.4.44/plugins/ext.headerfilter.js') }}"></script>
+    <script src="{{ url_for('static', filename='SlickGrid-2.4.44/plugins/slick.checkboxselectcolumn.js') }}"></script>
+    <script src="{{ url_for('static', filename='SlickGrid-2.4.44/slick.groupitemmetadataprovider.js') }}"></script>
+    <script src="{{ url_for('static', filename='SlickGrid-2.4.44/controls/slick.pager.js') }}"></script>
+    <script src="{{ url_for('static', filename='SlickGrid-2.4.44/controls/slick.columnpicker.js') }}"></script>
+    <div id="page-container" class="centered-layout">
+        <header>
+            <h1 class="header-center">CowPlus Online (Beta)</h1>
+            <br>
+            <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+                <div class="container-fluid">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="index.html">Home</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="dataUnlimVar.html">Data</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="upload.html">Upload</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="shared.html">Shared</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="guides.html">Guides and FAQ</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="download.html">Downloads</a>
+                        </li>
+                    </ul>
+                        
+                    <ul class="navbar-nav ms-auto">
+                        {% if 'user' in session %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="/user">{{ session['user']}}</a>
+                            </li>
+                        {% endif %}
+                        <li class="nav-item">
+                            {% if 'user' in session %}
+                                <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                            {% else %}
+                                <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+                            {% endif %}
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </header>
+        <div id = "uploadGuide" style="padding-top:20px">
+            <h4>How to Upload Datasets for Personal Use</h4>
+            <ol>
+                <li>The upload function only accepts “.csv” files. Please make sure that your datasets have the following variables. If you do not have these variables, an alert will show up and your file will not pass verification for uploading.</li>
+                <ol type="a">
+                    <li>For monadic datasets: stateabb (state abbreviations), ccode (country codes), year</li>
+                    <li>For dyadic datasets: stateabb1, ccode1, stateabb2, ccode2, year</li>
+                    <li>For country codes and state abbreviations, please refer to the <a href=https://correlatesofwar.org/data-sets/cow-country-codes-2>Correlates of War website.</a></li>
+                </ol>
+                <li>Click the “Verify” button. It may take some time for your data to pass verification, especially if you have a lot of variables.</li>
+                <li>After your file has passed verification, simply click “Upload.” Once again, it may take some time to upload if you have large datasets (>50 MB). Both buttons will be grayed out, indicating that the upload process has begun.</li>
+                <li>When you return to the “Data” page, you may notice that the variable table takes a longer time to generate. This is because the variable table’s generation speed is dependent on the number of variables across all preloaded datasets as well as all of your uploaded datasets. To minimize the speed difference, it would be best to upload your datasets with only the variables that you would like to add to your “Data” page. You can also delete your datasets in your user page.
+                </li>
+            </ol>
+        </div>
+        <div id="upload" style="padding-top:20px">
+            <form action="" id="uploadForm" method="post" enctype="multipart/form-data">
+                <div id="drop-area" class="drop-area">
+                    <p>Drag & Drop your files here or click to upload</p>
+                    <input type="file" id="file-input" name="file" oninput="triggerValidationUpload(this)" accept=".csv" hidden/>
+                </div>
+                <ul id="file-list"></ul>
+                <div id="metadata-container" style="display: none;">
+                    <div>
+                        <label for="citation">Manual citation (Chicago):</label>
+                        <br>
+                        <textarea id="citation" name="citation" rows="4" cols="50" required></textarea>
+                    </div>
+                </div>
+                <button id="verifyFile" type="button">Verify</button>
+                <button id="uploadButton" type="button">Upload</button>
+        
+                <progress id="progressBar" value="0" max="100" style="width:300px;"></progress>
+                <h3 id="status"></h3>
+                <p id="loaded_n_total"></p>
+        
+                <p id="processing_upload" style="padding:0px; margin: 0px; display:none; font-family:Arial, Helvetica, sans-serif; font-size:13.33333px;">processing...please wait</p>
+            </form>
+        </div>
+        <footer id="footer" class="text-center py-4">
+            <p>&copy; <script>document.write(new Date().getFullYear());</script> CowPlus Online</p>
+            <ul class="list-inline">
+                <li class="list-inline-item"><a href="index.html">Home</a></li>
+                <li class="list-inline-item"><a href="dataUnlimVar.html">Data</a></li>
+                <li class="list-inline-item"><a href="download.html">Downloads</a></li>
+                <li class="list-inline-item"><a href="upload.html">Upload</a></li>
+                <li class="list-inline-item"><a href="shared.html">Shared</a></li>
+                <li class="list-inline-item"><a href="guides.html">Guides and FAQ</a></li>
+                <li class="list-inline-item"><a href="sources.html">Sources</a></li>
+                <li class="list-inline-item"><a href="mailto:paulpoast@uchicago.edu">Contact</a></li>
+            </ul>
+        </footer>
+    </div>
+
+    <script>
+        
+
+        const dropArea = document.getElementById('drop-area');
+        const fileInput = document.getElementById('file-input');
+        const fileList = document.getElementById('file-list');
+        const metadataContainer = document.getElementById('metadata-container');
+        const uploadButton = document.getElementById('uploadButton');
+
+        dropArea.addEventListener('click', () => fileInput.click());
+
+        dropArea.addEventListener('dragover', (event) => {
+            event.preventDefault();
+            dropArea.classList.add('dragging');
+        });
+
+        dropArea.addEventListener('dragleave', () => {
+            dropArea.classList.remove('dragging');
+        });
+
+        dropArea.addEventListener('drop', (event) => {
+            event.preventDefault();
+            dropArea.classList.remove('dragging');
+
+            // Get the dropped files
+            const files = event.dataTransfer.files;
+            handleFiles(files);
+        });
+
+        function handleFiles(files) {
+            // Add files to the input element's files property
+            const dataTransfer = new DataTransfer();
+            for (const file of files) {
+                dataTransfer.items.add(file);
+            }
+            fileInput.files = dataTransfer.files;
+
+            // Clear previous file list
+            fileList.innerHTML = '';
+            // Display file names
+            for (const file of files) {
+                const listItem = document.createElement('li');
+                listItem.textContent = file.name;
+                fileList.appendChild(listItem);
+            }
+
+            // Show the metadata input and upload button
+            metadataContainer.style.display = 'block';
+        }
+
+        fileInput.addEventListener('change', () => {
+            handleFiles(fileInput.files);
+        });
+    </script>
+</body>
+</html>

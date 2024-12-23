@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}CowPlus | Login{% endblock %}
+
+{% block content %}
+<style>
+	input {
+    margin-right: 10px;
+	}
+
+	span {
+		white-space: nowrap;
+	}
+</style>
+<script>
+	function showHint(inputElement, message) {
+		var hintId = inputElement.name + "Hint"; // Construct the ID of the span from the input's name attribute
+		document.getElementById(hintId).textContent = message; // Set the text content of the span
+	}	
+</script>
+<form action="#" method="POST">
+	<p>Sign up:</p>
+	<p>Please avoid using a password that you have used on other websites.<br>
+		We are actively working to enhance the security of our website, but please note that our security measures have not yet undergone comprehensive testing.<br></p>
+	<p>
+		<input autocomplete="off" type="text" name="nm" placeholder="Username" onclick="showHint(this, 'Username must be between 5 and 15 characters in length and should only contain lowercase letters or numbers.')"/>
+		<span id="nmHint"></span>
+	</p>
+	<p>
+		<input autocomplete="off" type="email" name="em" placeholder="Email"/>
+	</p>
+	<p>
+		<input autocomplete="off" type="confirmemail" name="cem" placeholder="Confirm Email"/>
+	</p>
+	<p>
+		<input autocomplete="off" type="password" name="pwd" placeholder="Password" onclick="showHint(this, 'Password should contain 8-20 characters, including special characters.')"/>
+		<span id="pwdHint"></span>
+	</p>
+	<input type="checkbox" id="privacy_policy" name="privacy_policy" value="privacy_policy" onclick="checkAgreements()">
+	<label for="privacy_policy"> By signing up for CowPlusOnline, you agree to our <a href="privacy_policy.html">Privacy Policy</a>.</label><br>
+	<input type="checkbox" id="tos" name="tos" value="tos" onclick="checkAgreements()">
+	<label for="tos"> By signing for to CowPlusOnline, you agree to our <a href="terms_of_service.html">Terms of Service</a>.</label><br>
+	<p><input type="submit" value="Submit" id="signupButtonSubmit" disabled/></p>
+</form>
+{% endblock %}

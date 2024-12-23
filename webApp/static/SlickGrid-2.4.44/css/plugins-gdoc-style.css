@@ -1,0 +1,49 @@
+﻿
+
+
+
+.slick-cell {
+    border-color: transparent #CCCCCC #CCCCCC transparent;
+    border-style: solid solid solid solid;
+    border-width: 0px 1px 1px 0px;
+    padding: 4px 4px 0px 6px;
+    background-color: White;
+    font: 9pt arial, sans-serif;
+}
+
+.slick-header-column {
+    border-color: transparent #CCCCCC #CCCCCC transparent;
+    border-style: solid solid solid solid;
+    border-width: 1px 1px 0 0px;
+}
+
+.slick-header-columns {
+    font: 9pt arial, sans-serif;
+    color: black;
+    background-color: #F3F3F3;
+    border-top: 1px solid #CCCCCC;
+    border-bottom: 1px solid #CCCCCC;
+}
+
+.selected-header {
+    background-color: #C8C8C8;
+}
+
+.slick-column-name {
+    margin-right: 14px;
+    text-align: center;
+}
+
+.header-overlay {
+    background-color: transparent;
+}
+
+.cell-overlay {
+    background-color: #5292F7;
+}
+
+
+
+
+
+

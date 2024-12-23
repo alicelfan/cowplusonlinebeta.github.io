@@ -1,0 +1,2 @@
+ccode1,ccode2,year,stateabb1,stateabb2,flow1,flow2,smoothflow1,smoothflow2,smoothtotrade,china_alt_flow1
+"","","","","","Imports of Country 1 from Country 2, in US millions of current dollars","Imports of Country 2 from Country 1, in US millions of current dollars",Smoothed flow1 values,Smoothed flow2 values,Smoothed total trade values (obtained by first summing Flow1 and Flow2 and then applying smoothing).,Original figures for the People's Republic of China
