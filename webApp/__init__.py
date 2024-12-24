@@ -1475,18 +1475,20 @@ def getStateColumns():
     if len(stateabb_vals) > 0:
         state_columns_dict = {'stateabb': stateabb_vals}
         state_columns = pd.DataFrame(data=[state_columns_dict])
+        print(state_columns)
     elif (len(stateabb1_vals) > 0) & (len(stateabb2_vals) >0):
         state1_columns_dict = {'stateabb1': stateabb1_vals} 
         state2_columns_dict = {'stateabb2': stateabb2_vals}
         state_columns1 = pd.DataFrame(data=[state1_columns_dict])
         state_columns2 = pd.DataFrame(data=[state2_columns_dict])
+        print(state_columns1)
     if len(stateabb_vals) > 0:
         response = {
             "message": "data processing successful",
             "status": 200,
             "state_columns": state_columns.to_json(orient = "values")
         }
-    elif (len(stateabb1_vals) > 0) & (len(stateabb2_vals) >0):
+    elif (len(stateabb1_vals) > 0) & (len(stateabb2_vals) > 0):
         response = {
             "message": "data processing successful",
             "status": 200,
@@ -1534,7 +1536,7 @@ def create_df_secondstep():
         csv_file_path = config["UPLOAD_FOLDER"] + "/" + session["user"] + "/temp/temp.csv"
         print("dbg.csv_file_path = " + csv_file_path)
         os.makedirs(os.path.dirname(csv_file_path), exist_ok=True)
-        sample2.to_csv(csv_file_path, index=False)
+        dataframe2.to_csv(csv_file_path, index=False)
     
     response = {
         "message": "data processing successful",
