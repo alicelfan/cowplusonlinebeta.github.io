@@ -17,12 +17,18 @@
     <hr style="border: .7px solid #2C3E50;">
     <h4>How to Upload Datasets for Personal Use</h4>
     <ol>
-        <li>The upload function only accepts “.csv” files. Please make sure that your datasets have the following variables. If you do not have these variables, an alert will show up and your file will not pass verification for uploading.</li>
+        <li>The upload function only accepts “.csv” files. <b>Please make sure that your datasets have the following variables.</b></li>
         <ol type="a">
             <li>For monadic datasets: stateabb (state abbreviations), ccode (country codes), year</li>
             <li>For dyadic datasets: stateabb1, ccode1, stateabb2, ccode2, year</li>
             <li>For country codes and state abbreviations, please refer to the <a href=https://correlatesofwar.org/data-sets/cow-country-codes-2>Correlates of War website.</a></li>
         </ol>
+        <li>Additionally, please check that your dataset has <b>no duplicate members.</b></li>
+        <ol type="a">
+            <li>For monadic datasets: this means that the stateabb-year pairs are all unique.</li>
+            <li>For dyadic datasets: this means that the stateabb1-stateabb2-year triples are all unique.</li>
+        </ol>
+        <li>If you do not have these variables or if your dataset has duplicate members, an alert will show up and your file will not pass verification for uploading.</li>
         <li>Click the “Verify” button. It may take some time for your data to pass verification, especially if you have a lot of variables.</li>
         <li>After your file has passed verification, simply click “Upload.” Once again, it may take some time to upload if you have large datasets (>50 MB). Both buttons will be grayed out, indicating that the upload process has begun.</li>
         <li>When you return to the “Data” page, you may notice that the variable table takes a longer time to generate. This is because the variable table’s generation speed is dependent on the number of variables across all preloaded datasets as well as all of your uploaded datasets. To minimize the speed difference, it would be best to upload your datasets with only the variables that you would like to add to your “Data” page. You can also delete your datasets in your user page.
@@ -31,12 +37,18 @@
     <hr style="border: .7px solid #2C3E50;">
     <h4>How to Upload Datasets for Public Use</h4>
     <ol>
-        <li>The upload function only accepts “.csv” files. Please make sure that your datasets have the following variables. If you do not have these variables, an alert will show up and your file will not pass verification for uploading.</li>
-            <ol type="a">
-                <li>For monadic datasets: stateabb (state abbreviations), ccode (country codes), year</li>
-                <li>For dyadic datasets: stateabb1, ccode1, stateabb2, ccode2, year</li>
-                <li>For country codes and state abbreviations, please refer to the <a href=https://correlatesofwar.org/data-sets/cow-country-codes-2>Correlates of War website.</a></li>
-            </ol>
+        <li>The upload function only accepts “.csv” files. <b>Please make sure that your datasets have the following variables.</b></li>
+        <ol type="a">
+            <li>For monadic datasets: stateabb (state abbreviations), ccode (country codes), year</li>
+            <li>For dyadic datasets: stateabb1, ccode1, stateabb2, ccode2, year</li>
+            <li>For country codes and state abbreviations, please refer to the <a href=https://correlatesofwar.org/data-sets/cow-country-codes-2>Correlates of War website.</a></li>
+        </ol>
+        <li>Additionally, please check that your dataset has <b>no duplicate members.</b></li>
+        <ol type="a">
+            <li>For monadic datasets: this means that the stateabb-year pairs are all unique.</li>
+            <li>For dyadic datasets: this means that the stateabb1-stateabb2-year triples are all unique.</li>
+        </ol>
+        <li>If you do not have these variables or if your dataset has duplicate members, an alert will show up and your file will not pass verification for uploading.</li>
         <li>Click the “Verify” button. It may take some time for your data to pass verification, especially if you have a lot of variables.</li>
         <li>After your file has passed verification, simply click “Upload.” Once again, it may take some time to upload if you have large datasets (>50 MB). Both buttons will be grayed out, indicating that the upload process has begun.</li>
         <li>To delete your datasets from the Shared page, simply click “Delete.” To download datasets to your computer, click “Download.” To import datasets to your uploaded datasets list, click “Import.” Finally, to preview datasets before downloading or importing datasets, click “Preview.”</li>

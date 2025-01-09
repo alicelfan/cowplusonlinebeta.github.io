@@ -1490,7 +1490,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
 				console.log(form_data)
 				$.ajax({
 					type: 'POST',
-					url: '/verifyFunction',
+					url: 'http://127.0.0.1:5000/verifyFunction/',
 					data: form_data,
 					contentType: false,
 					cache: false,
@@ -1505,19 +1505,19 @@ document.addEventListener("DOMContentLoaded", function(event) {
 							string_2 += "    " + good[g] + '\n';
 						}
 						string_2 += "    " + good[good.length-1];
-						if (good.length == 0){
-							string_2 = "    none";
-						}
-						string_3 = "These datasets are not allowed to be uploaded because they did not have the necessary column names: \n";
+						string_3 = "These datasets are not allowed to be uploaded: \n";
 						string_4 = "";
+						string_5 = "\nPlease check that your file has the necessary column names listed above and that your dataset has no duplicates as described in the guide above."
 						for (let b = 0; b < bad.length-1; b++){
 							string_4 += "    " + bad[b] + '\n';
 						}
 						string_4 += "    " + bad[bad.length-1];
-						if (bad.length == 0){
-							string_4 = "    none";
+						if (good.length == 0) {
+							string_f = string_3 + string_4 + string_5;
 						}
-						string_f = string_1 + string_2 + '\n' + string_3 + string_4;
+						if (bad.length == 0) {
+							string_f = string_1 + string_2;
+						}
 						alert(string_f)
 						if((bad.length == 0) && (good.length > 0) ){
 							document.getElementById("uploadButton").disabled = false;
@@ -1547,7 +1547,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
             // AJAX request using jQuery
             $.ajax({
                 type: 'POST',
-                url: '/uploadFunction',
+                url: 'http://127.0.0.1:5000/uploadFunction/',
                 data: form_data,
                 contentType: false,
                 cache: false,
@@ -1626,7 +1626,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
 				form_data.append('file', firstChunk, file.name);
 				$.ajax({
 					type: 'POST',
-					url: '/verifyFunctionShared',
+					url: 'http://127.0.0.1:5000/verifyFunctionShared/',
 					data: form_data,
 					contentType: false,
 					cache: false,
@@ -1636,24 +1636,24 @@ document.addEventListener("DOMContentLoaded", function(event) {
 						good = response[1][1];
 						bad = response[0][1];
 						string_1 = "These datasets are allowed to be uploaded: \n";
-						string_2_shared = "";
+						string_2 = "";
 						for (let g = 0; g < good.length-1; g++){
-							string_2_shared += "    " + good[g] + '\n';
+							string_2 += "    " + good[g] + '\n';
 						}
-						string_2_shared += "    " + good[good.length-1];
-						if (good.length == 0){
-							string_2_shared = "    none";
-						}
-						string_3 = "These datasets are not allowed to be uploaded because they did not have the necessary column names: \n";
+						string_2 += "    " + good[good.length-1];
+						string_3 = "These datasets are not allowed to be uploaded: \n";
 						string_4 = "";
+						string_5 = "\nPlease check that your file has the necessary column names listed above and that your dataset has no duplicates as described in the guide above."
 						for (let b = 0; b < bad.length-1; b++){
 							string_4 += "    " + bad[b] + '\n';
 						}
 						string_4 += "    " + bad[bad.length-1];
-						if (bad.length == 0){
-							string_4 = "    none";
+						if (good.length == 0) {
+							string_f = string_3 + string_4 + string_5;
 						}
-						string_f = string_1 + string_2_shared + '\n' + string_3 + string_4;
+						if (bad.length == 0) {
+							string_f = string_1 + string_2;
+						}
 						alert(string_f)
 						if((bad.length == 0) && (good.length > 0) ){
 							document.getElementById("uploadButtonShared").disabled = false;
@@ -1676,7 +1676,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
 			var form_data = new FormData($('#file-upload-form')[0]);
 			$.ajax({
 				type: 'POST',
-				url: '/shared.html',
+				url: 'http://127.0.0.1:5000/shared.html',
 				data: form_data,
 				contentType: false,
 				cache: false,

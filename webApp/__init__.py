@@ -1118,6 +1118,7 @@ def logout():
     flash("Logged out successfully.")
     return redirect(url_for("login"))
 
+# gets variables for the variable table
 def getVarJSONs():
     user = session["user"]
     found_user = users.query.filter_by(name=user).first()
@@ -1187,7 +1188,7 @@ def getVarJSONs():
         session["a_var_descrip_json"], session["m_var_descrip_json"] = variables.createVarDescrip_JS("test_profile")
         session["a_var_dataset_json"], session["m_var_dataset_json"] = variables.createVarDataset_JS("test_profile")'''
 
-
+#gets variables for the first variable table
 @app.route('/firstStepVarJSON/', methods=['POST', "GET"])
 def firstStepVarJSON():
     getVarJSONs() 
@@ -1238,6 +1239,7 @@ def firstStepVarJSON():
     }
     return response
 
+#gets variables for the second variable table (after user merges dyadic data and chooses to add monadic data)
 @app.route('/secondStepVarJSON/', methods=['POST', "GET"])
 def secondStepVarJSON():
     filenames = {
@@ -1361,6 +1363,7 @@ def processvcss():
     debug("session on vdchooserss", session)
     return 'okay' # replace
 
+# creates the merged dataset for the first step
 @app.route('/createDf/', methods=['POST', "GET"])
 def create_df():
     debug("session on createDf", session)
@@ -1455,6 +1458,7 @@ def locktest():
         logging.info("Could not acquire lock, resource is busy.")
         return "Resource is busy, please try in a moment", 429
 
+# gets state columns for state filters
 @app.route('/getStateColumns', methods=['POST', "GET"])
 def getStateColumns():
     temp_csv_path = os.path.join(config["UPLOAD_FOLDER"], session["user"], 'temp', 'temp.csv')
@@ -1497,6 +1501,7 @@ def getStateColumns():
         }
     return response
 
+#gets dataframe for the back button
 @app.route('/backbutton2/', methods=['POST', "GET"])
 def back_button_2():
     temp_csv_path = os.path.join(config["UPLOAD_FOLDER"], session["user"], 'temp', 'temp.csv')
@@ -1512,6 +1517,7 @@ def back_button_2():
     }
     return response
 
+# creates a table for the second table of data
 @app.route('/createDfSS/', methods=['POST', "GET"])
 def create_df_secondstep():
     temp_csv_path = os.path.join(config["UPLOAD_FOLDER"], session["user"], 'temp', 'temp.csv')
@@ -1553,7 +1559,7 @@ def goto_displayData():
         # makes no sense to be at this page without hitting the "generate" button
         return render_template("error")
 
-
+#filters the data based on the user's inputs
 @app.route('/filterData', methods=['POST'])
 def processfilters():
     debug("filter data", "called")
@@ -1594,7 +1600,7 @@ def downloadCitations():
     today = datetime.now()
     return send_file(buffer, as_attachment=True, download_name=f"citations_{today.strftime('%Y%m%d_%H%M%S')}.txt", mimetype='text/plain')
 
-
+#allows the user to download dataframe after filter-processing
 @app.route('/downloadDf/', methods=['POST', "GET"])
 def downloadCSV():
     dc = session["dc"]

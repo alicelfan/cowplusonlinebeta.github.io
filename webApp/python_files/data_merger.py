@@ -66,11 +66,14 @@ def check(col, data):
 
 monadic_reqcol = ["stateabb", "ccode", "year"]
 dyadic_reqcol = ["stateabb1", "ccode1", "stateabb2", "ccode2", "year"]
+
+#checks that columns are correctly added for merging
 def column_check(dataframe, reqcol):
     if not set(reqcol).issubset(set(dataframe.columns)):
        return False
     return True
 
+#finds longest data file
 def find_largest(files):
     length = len(files[0])
     data_file = files[0]
@@ -80,25 +83,17 @@ def find_largest(files):
             data_file = files[i]
     return data_file
 
-def check_duplicates(data, datatype):
-    cols_monadic = ["stateabb", "ccode", "year"]
-    cols_dyadic = ["stateabb1", "ccode1", "stateabb2", "ccode2", "year"]
-    if(datatype == "monadic"):
-        return len(data) - len(data.drop_duplicates(subset = cols_monadic))
-    if(datatype == "dyadic"):
-        return len(data) - len(data.drop_duplicates(subset = cols_dyadic))
-
+#removes items from a list
 def remove_items(test_list, item):
  
     res = list(filter((item).__ne__, test_list))
  
     return res
 
-# files_chosen_raw = ["nmc", 'wrp']
-# variables_chosen = ['stateabb', 'year', 'ccode', 'milex', 'stateabb', 'year', 'ccode', 'chrstprot']
 def createNewDataList(files_chosen_raw, variables_chosen, username):
     directory_uploaded = os.path.join(config["UPLOAD_FOLDER"], username)
     files_chosen = []
+    # if a file is in the list of files chosen by the user, add it to the array files_chosen
     for name in files_chosen_raw:
         f = os.path.join(directory_preloaded, name +'.csv')
         # checking if it is a file
@@ -110,16 +105,19 @@ def createNewDataList(files_chosen_raw, variables_chosen, username):
                 files_chosen.append(pd.read_csv(f)[1:])
     print("data_merger> dc:",str(files_chosen))
     print("data_merger> vc:",str(variables_chosen))
+
+    # find the largest data file out of the files chosen by the user
     largest_file = find_largest(files_chosen)
+
+    #determine if data is is monadic or dyadic
     if(column_check(files_chosen[0], monadic_reqcol)):
         datatype = "monadic"
     elif(column_check(files_chosen[0], dyadic_reqcol)):
         datatype = "dyadic"
+    
+    # if data is monadic
     if(datatype == "monadic"):
-        # variables_chosen = remove_items(variables_chosen, "stateabb")
-        # variables_chosen = remove_items(variables_chosen, "ccode")
-        # variables_chosen = remove_items(variables_chosen, "year")
-        print(variables_chosen)
+        # add event ids to each of the files chosen (unique because there should not be duplicates in the preloaded / uploaded data)
         for file_df in files_chosen:
             file_df["eventID"] = file_df["stateabb"].astype(str) + "_" + file_df["ccode"].astype(str) + "_" + file_df["year"].astype(str)
         cols_monadic = ["eventID"]
@@ -147,12 +145,6 @@ def createNewDataList(files_chosen_raw, variables_chosen, username):
         df.year = df.year.astype(int)
         df = df.sort_values(by=["ccode", "year"])
     if(datatype == "dyadic"):
-        # variables_chosen = remove_items(variables_chosen, "stateabb1")
-        # variables_chosen = remove_items(variables_chosen, "ccode1")
-        # variables_chosen = remove_items(variables_chosen, "stateabb2")
-        # variables_chosen = remove_items(variables_chosen, "ccode2")
-        # variables_chosen = remove_items(variables_chosen, "year")
-        print(variables_chosen)
         for data_file in files_chosen:
             data_file["eventID"] = data_file["stateabb1"].astype(str) + "_" + data_file["ccode1"].astype(str) + "_" + data_file["stateabb2"].astype(str) + "_" + data_file["ccode2"].astype(str) + "_" + data_file["year"].astype(str)
         cols_dyadic = ["eventID"]
@@ -211,14 +203,10 @@ def createNewDataListSecondStep(data_frame, fcrss, vcss, fcr, vc, username):
     print("data_merger> dc:",str(files_chosen))
     print("data_merger> vc:",str(vcss))
     datatype = "monadic"
-    # vcss = remove_items(vcss, "stateabb")
-    # vcss = remove_items(vcss, "ccode")
-    # vcss = remove_items(vcss, "year")
-    #take create eventIDs for files_chosen
+    #creates eventIDs for files_chosen
     for file_df in files_chosen:
             file_df["eventID"] = file_df["stateabb"].astype(str) + "_" + file_df["ccode"].astype(str) + "_" + file_df["year"].astype(str)
     cols_monadic = ["eventID"]
-    #create eventIDs for df
     df["eventID_state1"] = df["stateabb1"].astype(str) + "_" + df["ccode1"].astype(str) + "_" + df["year"].astype(str)
     df["eventID_state2"] = df["stateabb2"].astype(str) + "_" + df["ccode2"].astype(str) + "_" + df["year"].astype(str)
     for data_file in files_chosen: 
@@ -235,6 +223,3 @@ def createNewDataListSecondStep(data_frame, fcrss, vcss, fcr, vc, username):
         cols_monadic = ["eventID"]
     df.fillna(".", inplace=True)
     return df
-
-# new_df = createNewDataList(files_chosen_raw, variables_chosen)
-# print(new_df)
