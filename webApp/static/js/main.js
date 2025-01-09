@@ -1499,13 +1499,13 @@ document.addEventListener("DOMContentLoaded", function(event) {
 						response = Object.entries(data);
 						good = response[1][1];
 						bad = response[0][1];
-						string_1 = "These datasets are allowed to be uploaded: \n";
+						string_1 = "This dataset was successfully uploaded: \n";
 						string_2 = "";
 						for (let g = 0; g < good.length-1; g++){
 							string_2 += "    " + good[g] + '\n';
 						}
 						string_2 += "    " + good[good.length-1];
-						string_3 = "These datasets are not allowed to be uploaded: \n";
+						string_3 = "This dataset was NOT successfully uploaded: \n";
 						string_4 = "";
 						string_5 = "\nPlease check that your file has the necessary column names listed above and that your dataset has no duplicates as described in the guide above."
 						for (let b = 0; b < bad.length-1; b++){
@@ -1635,13 +1635,13 @@ document.addEventListener("DOMContentLoaded", function(event) {
 						response = Object.entries(data);
 						good = response[1][1];
 						bad = response[0][1];
-						string_1 = "These datasets are allowed to be uploaded: \n";
+						string_1 = "This dataset was successfully uploaded: \n";
 						string_2 = "";
 						for (let g = 0; g < good.length-1; g++){
 							string_2 += "    " + good[g] + '\n';
 						}
 						string_2 += "    " + good[good.length-1];
-						string_3 = "These datasets are not allowed to be uploaded: \n";
+						string_3 = "This dataset was NOT successfully uploaded: \n";
 						string_4 = "";
 						string_5 = "\nPlease check that your file has the necessary column names listed above and that your dataset has no duplicates as described in the guide above."
 						for (let b = 0; b < bad.length-1; b++){
